@@ -327,7 +327,9 @@ function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false
 function logout(msg){PASS='';status('');S.recv={};clearInterval(start.t);lsSet('guri_pass','');S.ready=false;renderLogin(msg)}
 function start(r){DATA=r.catalog||[];BY_ID=Object.fromEntries(DATA.map(d=>[d.id,d]));CATS=[...new Set(DATA.map(d=>d.c))];apply(r);
   S.view={mgr:'mgr',buy:'buy',dir:'dir',admin:'mgr'}[S.role];S.ready=true;$('login').hidden=true;$('app').hidden=false;render();
-  clearInterval(start.t);start.t=setInterval(async()=>{if(document.hidden||S.busy||pendingItems)return;const x=await call('state');if(x&&!x.error){apply(x);render()}},30000)}
+  clearInterval(start.t);start.t=setInterval(async()=>{if(document.hidden||S.busy||pendingItems||start.ping)return;start.ping=1;try{
+    let fresh=!window.GURI_API||++start.n%12===0;if(!fresh){const p=await call('ping');fresh=p&&p.rev&&p.rev!==S.rev}
+    if(fresh){const before=S.unread?{...S.unread}:{};const x=await call('state');if(x&&!x.error){apply(x);render();const nw=SUPS.filter(s=>(S.unread||{})[s]>(before[s]||0));if(nw.length&&can('chatSend'))status('Новое сообщение от '+nw.join(', ')+' — вкладка «Поставщики».','ok')}}}finally{start.ping=0}},window.GURI_API?5000:30000);start.n=0}
 // ===== навигация
 document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{S.view=b.dataset.role;render()});
 document.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{S.tab.mgr=b.dataset.mt;render()});
