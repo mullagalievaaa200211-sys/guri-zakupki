@@ -221,6 +221,27 @@ nav.roles{flex-wrap:nowrap}
 .grp{margin:16px 2px 6px;font-size:14px;font-weight:600}
 .chat{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:6px 2px}.msg{max-width:82%;display:flex;flex-direction:column;gap:2px;flex-shrink:0}.msg .b{padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.msg.m-buy{align-self:flex-end;align-items:flex-end}.msg.m-buy .b{background:var(--accent-soft);border-color:transparent}.msg.m-sys{align-self:center;max-width:100%}.msg.m-sys .b{background:none;border:none;color:var(--muted);font-size:13px;padding:2px}.msg small{color:var(--muted);font-size:12px}.okdot{color:var(--down);font-size:11px}.code{font-family:ui-monospace,monospace;background:var(--accent-soft);padding:1px 6px;border-radius:6px}
 .thumb[data-info]{cursor:zoom-in}dialog.info{border:none;border-radius:16px;padding:0;max-width:min(560px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.35)}dialog.info::backdrop{background:rgba(0,0,0,.5)}.info .ib img{width:100%;max-height:340px;object-fit:contain;background:#fff;display:block}.info .it{padding:16px 18px 18px}.info h3{margin:4px 0 6px;font-size:17px;line-height:1.35}.itbl{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:13.5px}.itbl th,.itbl td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}.itbl .r{text-align:right;white-space:nowrap}
+.dwrap{display:grid;grid-template-columns:300px 1fr;gap:12px;margin-top:12px;min-height:560px}
+.dlist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;overflow:auto;max-height:640px}
+.dlh{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:10px 10px 4px}
+.dl{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:none;border:0;border-radius:10px;padding:9px 10px;color:inherit;font:inherit;cursor:pointer}
+.dl:hover{background:var(--bg)}.dl.on{background:var(--accent-soft)}
+.dlt{flex:1;min-width:0;display:flex;flex-direction:column}.dlt b{font-size:14.5px}.dlt small,.dlt em{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:normal}.dlt em{color:var(--fg);opacity:.75}
+.dot2{width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none;background:var(--line)}.dot2.ok{background:var(--down)}.dot2.warn{background:var(--warn)}.dot2.bad{background:var(--up)}.dot2.acc{background:var(--accent)}
+.dpane{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
+.dh{display:flex;gap:10px;justify-content:space-between;align-items:center;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:8px}.dh>div{display:flex;flex-direction:column;min-width:0}.dh small{color:var(--muted);font-size:13px}
+.dpane .chat{flex:1;max-height:62vh;min-height:300px}
+.composer{display:flex;gap:8px;margin-top:10px;align-items:flex-end}.composer textarea{flex:1;min-width:0;resize:vertical}
+.msg.m-in{align-self:flex-start}.msg.m-extra .b{border-color:var(--accent);background:var(--accent-soft)}
+.plist{display:flex;flex-direction:column;gap:8px}.pr{display:flex;gap:10px;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--line)}.pr.bad{background:var(--up-soft)}.pr.warn{background:var(--warn-soft)}
+.back-m{display:none;align-self:flex-start;margin-bottom:8px}
+.btn.urgent{width:100%;margin:10px 0 4px;padding:14px;font-size:15.5px;font-weight:600;background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
+.btn.big{width:100%;padding:14px;font-size:15.5px;margin-top:8px}
+.st.warn{background:var(--warn-soft);color:var(--warn)}.st.bad{background:var(--up-soft);color:var(--up)}
+.flag.xf{background:var(--accent-soft);color:var(--accent)}tr.newrow td{background:var(--accent-soft)}
+.xrow{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.xrow span{display:flex;flex-direction:column}.xrow small{color:var(--muted)}
+.xadd h3{margin:0 0 4px;font-size:15px}
+@media (max-width:760px){.dwrap{grid-template-columns:1fr}.hide-m{display:none!important}.back-m{display:inline-flex}.xrow{grid-template-columns:40px 1fr;}.xrow input,.xrow button{grid-column:2}}
 </style>
 </head><body>
 <div class="wrap">
@@ -238,12 +259,13 @@ nav.roles{flex-wrap:nowrap}
   <button data-role="dir" aria-pressed="false">Руководство</button>
 </nav>
 <section id="v-mgr">
-  <div class="subtabs" role="group"><button data-mt="order" aria-pressed="true">Заявка</button><button data-mt="recv" aria-pressed="false">Приёмка</button></div>
+  <div class="subtabs" role="group"><button data-mt="order" aria-pressed="true">Заявка</button><button data-mt="recv" aria-pressed="false">Приёмка</button><button data-mt="msg" aria-pressed="false">Закупщица <span class="badge" id="bm"></span></button></div>
   <div id="m-order"></div>
   <div id="m-recv" hidden></div>
+  <div id="m-msg" hidden></div>
 </section>
 <section id="v-buy" hidden>
-  <div class="subtabs" role="group"><button data-bt="order" aria-pressed="true">Заказ поставщикам</button><button data-bt="feed" aria-pressed="false">Требует внимания <span class="badge" id="bb"></span></button><button data-bt="chat" aria-pressed="false">Поставщики <span class="badge" id="bc"></span></button><button data-bt="rules" aria-pressed="false">Договорённости</button></div>
+  <div class="subtabs" role="group"><button data-bt="order" aria-pressed="true">Заявки и заказ</button><button data-bt="chat" aria-pressed="false">Диалоги <span class="badge" id="bc"></span></button><button data-bt="rules" aria-pressed="false">Договорённости</button></div>
   <div id="b-main"></div>
 </section>
 <section id="v-dir" hidden><div id="d-main"></div></section>
@@ -257,7 +279,7 @@ let DATA=[],BY_ID={},CATS=[];
 const SUPS=['Амега','Капцова','Костенко','Оптиком'];
 const SC={'Амега':'var(--s-amega)','Капцова':'#4f7fc4','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
 const OPT_MIN=5000;
-const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin']};
+const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin']};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
@@ -274,8 +296,8 @@ const dayName=s=>WD[fromYmd(s).getUTCDay()];
 const dayAcc=s=>WDA[fromYmd(s).getUTCDay()];
 const hm=iso=>{if(!iso)return'';const d=new Date(new Date(iso).getTime()+MSK);if(isNaN(d))return'';return dm(ymd(d))+' '+String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')};
 function currentOrderDate(){const n=nowMsk();const t0=fromYmd(ymd(n));
-  for(let i=0;i<10;i++){const d=addDays(t0,i),w=d.getUTCDay();if(w!==2&&w!==5)continue;const cut=addDays(d,-1).getTime()+9*3600e3;if(n.getTime()<cut)return ymd(d)}}
-function cutText(date){const c=addDays(fromYmd(date),-1);return 'до 09:00, '+WD[c.getUTCDay()]+' '+dm(ymd(c))}
+  for(let i=0;i<10;i++){const d=addDays(t0,i),w=d.getUTCDay();if(w!==2&&w!==5)continue;const cut=addDays(d,-2).getTime()+23*3600e3;if(n.getTime()<cut)return ymd(d)}}
+function cutText(date){const c=addDays(fromYmd(date),-2);return 'до 23:00, '+WD[c.getUTCDay()]+' '+dm(ymd(c))}
 // ===== состояние
 const S={role:null,view:null,tab:{mgr:'order',buy:'order'},orders:{},receipts:{},alerts:[],rules:[],prices:{},log:[],baseline:null,
   ready:false,q:'',cat:'Все',buyDate:null,recvDate:null,recv:{},busy:false};
@@ -340,12 +362,9 @@ function render(){if(!S.ready)return;const v=S.view||'mgr';
   ['mgr','buy','dir'].forEach(r=>$('v-'+r).hidden=r!==v);
   const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='заявка '+cutText(cd);
   $('whoN').textContent=(WHO||'—')+' · '+(ROLE_N[S.role]||'');$('busy').hidden=!S.busy;
-  $('bb').textContent=S.alerts.filter(a=>a.status==='open').length||'';
-  {const seen=JSON.parse(lsGet('guri_seen')||'{}');const un=s=>((S.chats||{})[s]||[]).filter(m=>m.from==='sup'&&m.t>(seen[s]||'')).length;
-   S.chatSup=S.chatSup||SUPS[0];if((S.view||'mgr')==='buy'&&S.tab.buy==='chat'&&un(S.chatSup)){const ms=(S.chats||{})[S.chatSup]||[];seen[S.chatSup]=ms.length?ms[ms.length-1].t:'';lsSet('guri_seen',JSON.stringify(seen))}
-   S.unread=Object.fromEntries(SUPS.map(s=>[s,can('chatSend')?un(s):0]));const tot=Object.values(S.unread).reduce((a,b)=>a+b,0);
-   $('bc').textContent=tot||'';document.title=(tot?'('+tot+') ':'')+'Хозы Гури · Маяк'}
-  if(v==='mgr'){document.querySelectorAll('[data-mt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mt===S.tab.mgr));$('m-order').hidden=S.tab.mgr!=='order';$('m-recv').hidden=S.tab.mgr!=='recv';S.tab.mgr==='order'?renderOrder():renderRecv()}
+  {const ids=[PT_ID,...SUPS];const tot=ids.reduce((a,id)=>a+(S.role==='mgr'&&id!==PT_ID?0:unreadOf(id)),0);const pr=can('sendAll')?problems().length:0;
+   $('bc').textContent=(tot||'')+'';$('bm').textContent=S.role==='mgr'||S.role==='admin'?(unreadOf(PT_ID)||''):'';document.title=(tot?'('+tot+') ':'')+'Хозы Гури · Маяк'}
+  if(v==='mgr'){document.querySelectorAll('[data-mt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mt===S.tab.mgr));$('m-order').hidden=S.tab.mgr!=='order';$('m-recv').hidden=S.tab.mgr!=='recv';$('m-msg').hidden=S.tab.mgr!=='msg';S.tab.mgr==='order'?renderOrder():S.tab.mgr==='recv'?renderRecv():renderMgrMsg()}
   if(v==='buy'){document.querySelectorAll('[data-bt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.bt===S.tab.buy));renderBuy()}
   if(v==='dir')renderDir()}
 // ===== УПРАВЛЯЮЩАЯ: ЗАЯВКА
@@ -355,6 +374,7 @@ function usualQty(){const res={};Object.entries(S.orders).filter(([k,o])=>o.stat
 function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};const items=pendingItems||{...(o.items||{})};const ro=!can('saveOrder');const locked=o.status==='sent'||ro;const u=usualQty();
   let h=`<div class="screen-h"><div><h2>Заявка на ${dayAcc(date)}, ${dm(date)}</h2><p class="muted">Отправить закупщице ${cutText(date)}</p></div>${o.status==='sent'?'<span class="pill ok">Ушла поставщикам</span>':o.status==='submitted'?`<span class="pill ok">У закупщицы${o.submittedAt?' · '+hm(o.submittedAt):''}</span>`:'<span class="pill">Черновик</span>'}</div>`;
   if(ro)h+=`<div class="banner"><span>Вы смотрите заявку управляющей — менять её может только она.</span></div>`;
+  if(can('addExtra'))h+=`<button class="btn urgent" id="urg">⚡ Срочно / забыли — написать закупщику</button>`;
   if(o.status==='sent')h+=`<div class="banner ok"><span>Закупщица уже отправила заказ поставщикам — изменить нельзя. Если что-то срочно, напишите ей.</span></div>`;
   else if(o.status==='submitted'&&!ro)h+=`<div class="banner ok"><span>Заявка у закупщицы. Пока она не отправила её поставщикам, можно поправить — изменения сохранятся сами.</span></div>`;
   const row=d=>{const on=items[d.id]>0;const big=on&&u[d.id]&&items[d.id]>=u[d.id]*3;
@@ -370,7 +390,7 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
     h+=allMode&&res.length?CATS.map(c=>{const g=res.filter(d=>d.c===c);return g.length?`<h4 class="grp">${esc(c)} <span class="muted">· ${g.length}</span></h4><div class="list">${g.map(row).join('')}</div>`:''}).join(''):res.length?`<div class="list" style="margin-top:8px">${res.slice(0,120).map(row).join('')}</div>`:`<p class="muted" style="margin:8px 2px 0;font-size:13.5px">${ql.length>=2?'Ничего не нашлось.':'Введите 2–3 буквы или выберите раздел.'}</p>`;h+='</section>'}
   const n=Object.values(items).filter(q=>q>0).length;
   h+=`<div class="sticky"><span><b>Маяк</b>: ${n} позиций${saveTimer||S.busy?' · сохраняю…':''}</span>${o.status==='sent'||ro?'':o.status==='submitted'?'<span>Изменения сохраняются сами</span>':`<button class="btn primary" id="send" ${n&&!S.busy?'':'disabled'}>Отправить закупщице</button>`}</div>`;
-  const L=$('m-order');const hadFocus=document.activeElement&&document.activeElement.id==='mq';L.innerHTML=h;
+  const L=$('m-order');setTimeout(()=>{const u=$('urg');if(u)u.onclick=()=>{S.tab.mgr='msg';render()}},0);const hadFocus=document.activeElement&&document.activeElement.id==='mq';L.innerHTML=h;
   if(hadFocus&&$('mq')){const i=$('mq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}
   if($('mq'))$('mq').oninput=e=>{S.q=e.target.value;renderOrder()};
   L.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;S.q='';renderOrder()});
@@ -384,7 +404,7 @@ function queueSave(date){clearTimeout(saveTimer);saveTimer=setTimeout(()=>flushS
 async function flushSave(date){clearTimeout(saveTimer);saveTimer=null;if(!pendingItems)return;const items=pendingItems;const r=await call('saveOrder',{date,items});apply(r);if(pendingItems===items)pendingItems=null;render()}
 // ===== ЗАКУПЩИЦА
 function orderDates(){const set=new Set(Object.keys(S.orders));set.add(currentOrderDate());return[...set].sort().reverse().slice(0,8)}
-function renderBuy(){const M=$('b-main');if(S.tab.buy==='order')return renderBuyOrder(M);if(S.tab.buy==='feed')return renderFeed(M);if(S.tab.buy==='chat')return renderChat(M);return renderRules(M)}
+function renderBuy(){const M=$('b-main');if(S.tab.buy==='order')return renderBuyOrder(M);if(S.tab.buy==='feed'){S.tab.buy='chat';S.dlg='_prob'}if(S.tab.buy==='chat')return renderDialogs(M);return renderRules(M)}
 function renderChat(M){const codes=S.supCodes||{};const on=S.supOn||{};const sel=S.chatSup||SUPS[0];S.chatSup=sel;
   let h=`<p class="lead" style="margin-top:12px">Переписка с поставщиками через бота MAX «Гури Закупки». Поставщик подключается один раз: находит бота в MAX, жмёт «Начать» и присылает свой код. Заказы и ответы приходят сюда и вам в MAX.</p><div class="subtabs" role="group">${SUPS.map(s=>`<button data-cs="${s}" aria-pressed="${s===sel}">${s}${on[s]?' <span class="okdot" title="подключён">●</span>':''}${(S.unread||{})[s]?` <span class="badge">${S.unread[s]}</span>`:''}</button>`).join('')}</div>`;
   h+=`<div class="panel">${on[sel]?`<p class="muted" style="margin-top:0">Подключены: ${esc(on[sel].join(', '))}</p>`:`<p class="muted" style="margin-top:0">${sel} ещё не подключён к боту.${codes[sel]?` Код для подключения: <b class="code">${esc(codes[sel])}</b>`:''}</p>`}`;
@@ -398,24 +418,31 @@ function renderChat(M){const codes=S.supCodes||{};const on=S.supOn||{};const sel
   const c=$('chatbox');if(c)c.scrollTop=c.scrollHeight}
 function orderText(date,lines){return `Заказ Гури Маяк (ул. Приморская 2/4) на ${dayAcc(date)} ${dm(date)}:\n`+lines.map((l,i)=>`${i+1}. ${l.d.n} — ${l.qty} ${l.d.u}`).join('\n')+'\nСпасибо!'}
 function renderBuyOrder(M){const dates=orderDates();const date=S.buyDate&&dates.includes(S.buyDate)?S.buyDate:(dates.find(d=>S.orders[d]&&S.orders[d].status==='submitted')||currentOrderDate());S.buyDate=date;
-  const o=S.orders[date]||{};const al=allocate(o);const sent=o.sent||{};const ed=can('markSent');
+  const o=S.orders[date]||{};const al=allocate(o);const sent=o.sent||{};const ed=can('markSent');const sids=o.sentIds||{};const ex=o.extra||{};
   let h=`<div class="who-line"><label for="bd">Доставка</label><select id="bd">${dates.map(d=>`<option value="${d}" ${d===date?'selected':''}>${dayName(d)}, ${dm(d)}${S.orders[d]?' · '+({draft:'черновик',submitted:'заявка готова',sent:'отправлено'}[S.orders[d].status]||''):' · заявки нет'}</option>`).join('')}</select></div>`;
-  if(!o.status||o.status==='draft')h+=`<div class="banner warn"><span>Управляющая ещё не отправила заявку${o.items?' — ниже черновик, он может измениться':''}.</span></div>`;
+  if(!o.status||o.status==='draft')h+=`<div class="banner warn"><span>Управляющая ещё не отправила заявку${o.items?' — ниже черновик, он может измениться. В '+cutText(date).replace('до ','')+' заявка закроется сама':''}.</span></div>`;
   if(!al.lines.length){M.innerHTML=h+'<div class="panel"><p class="muted">В заявке пока нет позиций.</p></div>';$('bd').onchange=e=>{S.buyDate=e.target.value;render()};return}
   al.notes.forEach(n=>h+=`<div class="banner"><span>↻ ${esc(n)}</span></div>`);
-  const tot=al.lines.reduce((a,l)=>a+priceFor(l.d,l.sup)*l.qty,0);
+  const tot=al.lines.reduce((a,l)=>a+priceFor(l.d,l.sup)*l.qty,0);const sups=SUPS.filter(s=>al.lines.some(l=>l.sup===s));
+  const newOf=s=>sent[s]&&sids[s]?al.lines.filter(l=>l.sup===s&&!sids[s].includes(l.d.id)):[];
+  const todo=sups.filter(s=>!sent[s]);
   h+=`<p class="lead" style="margin-top:12px">Заявка разложена по самым выгодным ценам. Поставщика у строки можно поменять. Ориентировочно ${rub0(tot)}.</p>`;
-  SUPS.forEach(s=>{const ls=al.lines.filter(l=>l.sup===s);if(!ls.length)return;const sum=ls.reduce((a,l)=>a+priceFor(l.d,s)*l.qty,0);
-    h+=`<div class="sup"><div class="h"><span><span class="dot" style="background:${SC[s]}"></span><b>${s}</b> <span class="muted">· ${ls.length} строк · ${rub0(sum)}</span></span>${sent[s]?`<span class="st ok">Отправлено ${hm(sent[s].at)}</span>`:`<span class="row"><button class="btn" data-copy="${s}">Скопировать заказ</button>${can('sendOrder')&&(S.maxOn||(S.supOn||{})[s])?`<button class="btn" data-max="${s}" ${S.busy?'disabled':''}>${(S.supOn||{})[s]?'Отправить в MAX':'Прислать мне в MAX'}</button>`:''}${ed?`<button class="btn primary" data-sent="${s}" ${S.busy?'disabled':''}>Отметить: отправлено</button>`:''}</span>`}</div>
-    <div class="tbl"><table><tr><th>Позиция</th><th class="r">Кол-во</th><th class="r">Цена</th><th>Поставщик</th></tr>${ls.map(l=>`<tr><td>${esc(l.d.n)}${l.moved?' <span class="flag">переложено</span>':''}</td><td class="r">${l.qty} ${esc(l.d.u)}</td><td class="r">${rub(priceFor(l.d,s))}${lastP(l.d.id,s)!=null?'':' <small class="muted">прайс</small>'}</td><td><select data-asg="${l.d.id}" ${ed&&!sent[s]?'':'disabled'} aria-label="поставщик">${supsFor(l.d).map(x=>`<option ${x===s?'selected':''}>${x}</option>`).join('')}</select></td></tr>`).join('')}</table></div></div>`});
+  if(todo.length&&can('sendAll')&&o.status!=='draft')h+=`<button class="btn primary big" id="sendall" ${S.busy?'disabled':''}>📤 Отправить всем поставщикам (${todo.join(', ')})</button><p class="muted" style="margin:6px 2px 0;font-size:13px">Бот сам пришлёт каждому его часть заказа с таблицей Excel. Кто не подключён к боту — тот заказ придёт вам в MAX, чтобы переслать.</p>`;
+  sups.forEach(s=>{const ls=al.lines.filter(l=>l.sup===s);const sum=ls.reduce((a,l)=>a+priceFor(l.d,s)*l.qty,0);const nw=newOf(s);const c=confOf(o,s);
+    const right=sent[s]?`<span class="row">${c?`<span class="st ${CONF_N[c][0]}">${CONF_N[c][1]}</span>`:''}<span class="st ok">Отправлено ${hm(sent[s].at)}</span>${nw.length&&can('sendOrder')?`<button class="btn primary" data-dz="${s}" ${S.busy?'disabled':''}>Отправить дозаказ (${nw.length})</button>`:''}<button class="btn" data-od="${s}">Диалог</button></span>`
+      :`<span class="row"><button class="btn" data-copy="${s}">Скопировать</button>${can('sendOrder')&&(S.maxOn||(S.supOn||{})[s])?`<button class="btn" data-max="${s}" ${S.busy?'disabled':''}>${(S.supOn||{})[s]?'Отправить в MAX':'Прислать мне в MAX'}</button>`:''}${ed?`<button class="btn" data-sent="${s}" ${S.busy?'disabled':''}>Отметить: отправлено</button>`:''}<button class="btn" data-od="${s}">Диалог</button></span>`;
+    h+=`<div class="sup"><div class="h"><span><span class="dot" style="background:${SC[s]}"></span><b>${s}</b> <span class="muted">· ${ls.length} строк · ${rub0(sum)}</span></span>${right}</div>
+    <div class="tbl"><table><tr><th>Позиция</th><th class="r">Кол-во</th><th class="r">Цена</th><th>Поставщик</th></tr>${ls.map(l=>{const isNew=nw.includes(l);return `<tr${isNew?' class="newrow"':''}><td>${esc(l.d.n)}${l.moved?' <span class="flag">переложено</span>':''}${ex[l.d.id]?` <span class="flag xf">дописано ${esc(ex[l.d.id].by||'')}</span>`:''}${isNew?' <span class="flag xf">не отправлено</span>':''}</td><td class="r">${l.qty} ${esc(l.d.u)}</td><td class="r">${rub(priceFor(l.d,s))}${lastP(l.d.id,s)!=null?'':' <small class="muted">прайс</small>'}</td><td><select data-asg="${l.d.id}" ${ed&&(!sent[s]||isNew)?'':'disabled'} aria-label="поставщик">${supsFor(l.d).map(x=>`<option ${x===s?'selected':''}>${x}</option>`).join('')}</select></td></tr>`}).join('')}</table></div></div>`});
   M.innerHTML=h;
   $('bd').onchange=e=>{S.buyDate=e.target.value;render()};
+  const gl=s=>al.lines.filter(l=>l.sup===s);const pack=ls=>({ids:ls.map(l=>l.d.id),lines:ls.map(l=>({id:l.d.id,qty:l.qty,price:priceFor(l.d,l.sup)}))});
+  const sa=$('sendall');if(sa)sa.onclick=()=>{status('Отправляю поставщикам… это займёт до минуты.');act('sendAll',{date,allSups:sups,groups:todo.map(s=>({sup:s,...pack(gl(s))}))})};
+  M.querySelectorAll('[data-dz]').forEach(b=>b.onclick=()=>{const s=b.dataset.dz;status('Отправляю дозаказ '+s+'…');act('sendOrder',{date,sup:s,extra:true,...pack(newOf(s))})});
+  M.querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{S.tab.buy='chat';S.dlg=b.dataset.od;S.dlgOpen=true;render()});
   M.querySelectorAll('[data-asg]').forEach(sel=>sel.onchange=()=>act('assign',{date,id:sel.dataset.asg,sup:sel.value,name:BY_ID[sel.dataset.asg].n.slice(0,50)}));
-  M.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const s=b.dataset.copy;const t=orderText(date,al.lines.filter(l=>l.sup===s));try{await navigator.clipboard.writeText(t);b.textContent='Скопировано ✓'}catch(e){const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='width:100%;min-height:160px;margin-top:8px';b.closest('.sup').appendChild(ta);ta.select();b.textContent='Выделите и скопируйте'}});
-  M.querySelectorAll('[data-max]').forEach(b=>b.onclick=()=>{const s=b.dataset.max;const ls=al.lines.filter(l=>l.sup===s);const sups=[...new Set(al.lines.map(l=>l.sup))];const all=sups.every(x=>x===s||sent[x]);status('Отправляю '+s+'…');
-    act('sendOrder',{date,sup:s,ids:ls.map(l=>l.d.id),all,lines:ls.map(l=>({id:l.d.id,qty:l.qty,price:priceFor(l.d,s)}))})});
-  M.querySelectorAll('[data-sent]').forEach(b=>b.onclick=()=>{const s=b.dataset.sent;const sups=[...new Set(al.lines.map(l=>l.sup))];const all=sups.every(x=>x===s||sent[x]);
-    act('markSent',{date,sup:s,ids:al.lines.filter(l=>l.sup===s).map(l=>l.d.id),all})})}
+  M.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const s=b.dataset.copy;const tx=orderText(date,gl(s));try{await navigator.clipboard.writeText(tx);b.textContent='Скопировано ✓'}catch(e){const ta=document.createElement('textarea');ta.value=tx;ta.style.cssText='width:100%;min-height:160px;margin-top:8px';b.closest('.sup').appendChild(ta);ta.select();b.textContent='Выделите и скопируйте'}});
+  M.querySelectorAll('[data-max]').forEach(b=>b.onclick=()=>{const s=b.dataset.max;const all=sups.every(x=>x===s||sent[x]);status('Отправляю '+s+'…');act('sendOrder',{date,sup:s,all,...pack(gl(s))})});
+  M.querySelectorAll('[data-sent]').forEach(b=>b.onclick=()=>{const s=b.dataset.sent;const all=sups.every(x=>x===s||sent[x]);act('markSent',{date,sup:s,ids:gl(s).map(l=>l.d.id),all})})}
 function renderFeed(M){const open=S.alerts.filter(a=>a.status==='open').sort((a,b)=>(b.at||'').localeCompare(a.at||''));const closed=S.alerts.filter(a=>a.status!=='open').sort((a,b)=>(b.closedAt||'').localeCompare(a.closedAt||'')).slice(0,15);
   const IC={price:'↑',short:'−',extra:'+',other:'!'};const ed=can('closeAlert');
   const card=a=>{const d=a.item&&BY_ID[a.item];const alts=d?supsFor(d).filter(s=>s!==a.sup).map(s=>`<span class="alt">${s}: ${rub(priceFor(d,s))}</span>`).join(''):'';
@@ -433,6 +460,96 @@ function renderRules(M){const ed=can('addRule');
    <div class="panel"><h3>Действующие договорённости</h3>${rulesList(true)}</div>`;
   $('radd').onclick=async()=>{const text=$('rt').value.trim();if(!text)return;await act('addRule',{sup:$('rs').value,text,until:$('ru').value||null})};
   M.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>act('offRule',{id:b.dataset.rr}))}
+// ===== ДИАЛОГИ (закупщица) и сообщения (управляющая)
+const PT='Маяк',PT_ID='pt:Маяк',PT_MGR='Анна';
+const me=()=>S.role==='mgr'?'mgr':'buy';
+function seenGet(){try{return JSON.parse(lsGet('guri_seen')||'{}')}catch(e){return{}}}
+function unreadOf(id){const seen=seenGet();const mine=me();return((S.chats||{})[id]||[]).filter(m=>m.from!=='sys'&&m.from!==mine&&m.t>(seen[id]||'')).length}
+function markSeen(id){const ms=(S.chats||{})[id]||[];if(!ms.length)return;const s=seenGet();if(s[id]===ms[ms.length-1].t)return;s[id]=ms[ms.length-1].t;lsSet('guri_seen',JSON.stringify(s))}
+function liveOrderDate(){const t=ymd(nowMsk());const ds=Object.keys(S.orders).filter(d=>d>=t&&['submitted','sent'].includes(S.orders[d].status)).sort();return ds[0]||null}
+function lastOrderDate(){const ds=Object.keys(S.orders).filter(d=>S.orders[d].items&&Object.keys(S.orders[d].items).length).sort().reverse();return ds[0]||null}
+const ST_N={draft:'черновик',submitted:'у закупщицы',sent:'отправлена поставщикам'};
+function confOf(o,s){const c=o&&o.conf&&o.conf[s];if(c)return c.st;return o&&o.sent&&o.sent[s]?'wait':null}
+const CONF_N={ok:['ok','✅ принято'],chg:['bad','✏️ есть изменения'],wait:['warn','ждём подтверждения']};
+function problems(){const out=[];const d=liveOrderDate()||lastOrderDate();const o=d&&S.orders[d];
+  if(o)SUPS.forEach(s=>{const c=confOf(o,s);if(c==='chg')out.push({sup:s,t:`${s}: есть изменения по заказу на ${dm(d)}`,k:'bad'});else if(c==='wait')out.push({sup:s,t:`${s}: не подтвердил заказ на ${dm(d)}`,k:'warn'})});
+  S.alerts.filter(a=>a.status==='open').forEach(a=>out.push({alert:a,t:a.text,k:'bad'}));return out}
+function msgHtml(m,sel){const mine=m.from===me();const who=m.from==='sup'?(m.name||sel):m.from==='mgr'?(m.name||PT_MGR)+' · '+PT:m.from==='buy'?(m.name||'Закупщица'):'';
+  const cls=m.from==='sys'?'m-sys':mine?'m-buy':'m-in';
+  return `<div class="msg ${cls}${m.kind==='extra'?' m-extra':''}"><div class="b">${m.kind==='extra'?'<b>➕ Дописано к заявке</b><br>':''}${esc(m.text||'')}${(m.att||[]).map(a=>`${m.text?'<br>':''}<a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name||(a.type==='image'?'фото':'файл'))}</a>`).join('')}</div>${m.from==='sys'?'':`<small>${esc(who)} · ${hm(m.t)}</small>`}</div>`}
+function chatBox(id,ph,enabled){const ms=((S.chats||{})[id]||[]).slice(-100);
+  return `<div class="chat" id="chatbox">${ms.length?ms.map(m=>msgHtml(m,id)).join(''):'<p class="muted" style="text-align:center;margin:24px 0">Сообщений пока нет.</p>'}</div>
+  <div class="composer"><textarea id="ct" class="inp" rows="2" placeholder="${esc(ph)}" ${enabled?'':'disabled'}></textarea><button class="btn primary" id="csend" ${enabled&&!S.busy?'':'disabled'}>Отправить</button></div>`}
+function bindChat(M,id){const ta=$('ct');if(ta){S.draft=S.draft||{};ta.value=S.draft[id]||'';ta.oninput=()=>{S.draft[id]=ta.value};ta.onkeydown=e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))$('csend').click()}}
+  const cb=$('csend');if(cb)cb.onclick=async()=>{const t=ta.value.trim();if(!t)return;const ok=await act('chatSend',{to:id,text:t});if(ok){S.draft[id]='';render()}};
+  const c=$('chatbox');if(c)c.scrollTop=c.scrollHeight;markSeen(id)}
+function renderDialogs(M){const on=S.supOn||{},codes=S.supCodes||{};const sel=S.dlg||'_help';S.dlg=sel;
+  const lastMsg=id=>{const a=(S.chats||{})[id]||[];return a.length?a[a.length-1]:null};
+  const d=liveOrderDate()||lastOrderDate();const o=d?S.orders[d]:null;const probs=problems();
+  const item=(id,title,sub,meta,badge,dot)=>`<button class="dl${sel===id?' on':''}" data-dl="${esc(id)}"><span class="dot2 ${dot||''}"></span><span class="dlt"><b>${esc(title)}</b><small>${esc(sub||'')}</small>${meta?`<em>${esc(meta)}</em>`:''}</span>${badge?`<span class="badge">${badge}</span>`:''}</button>`;
+  let L=`<div class="dlist${S.dlgOpen?' hide-m':''}">`;
+  L+=item('_help','✦ Помощник','Спросите: «что заказали на Маяке»','',0,'acc');
+  L+=item('_prob','Проблемы',probs.length?probs[0].t:'Всё в порядке','',probs.length,probs.length?'bad':'ok');
+  L+='<div class="dlh">Точки</div>';
+  const lm=lastMsg(PT_ID);L+=item(PT_ID,PT+' — '+PT_MGR,lm?lm.text:'Сообщений нет',o?`Заявка ${dm(d)} · ${ST_N[o.status]||''}`:'Заявки нет',unreadOf(PT_ID),'ok');
+  L+='<div class="dlh">Поставщики</div>';
+  SUPS.forEach(s=>{const l=lastMsg(s);const c=o?confOf(o,s):null;L+=item(s,s,on[s]?(l?l.text:'Подключён'):'Не подключён к боту',c?`Заказ ${dm(d)}: ${CONF_N[c][1]}`:'',unreadOf(s),!on[s]?'':c==='ok'?'ok':c==='chg'?'bad':c==='wait'?'warn':'ok')});
+  L+='</div>';
+  let R=`<div class="dpane${S.dlgOpen?'':' hide-m'}"><button class="btn back-m" id="dback">← Все диалоги</button>`;
+  if(sel==='_help'){R+=`<div class="dh"><div><b>✦ Помощник</b><small>Ищет ответ в заявках и переписке. Пишите своими словами.</small></div></div>
+    <div class="chat" id="chatbox">${(S.help||[]).map(m=>`<div class="msg ${m.q?'m-buy':'m-in'}"><div class="b">${m.q?esc(m.q):m.a}</div></div>`).join('')||`<div class="msg m-in"><div class="b">Примеры вопросов:<br>• что заказали на Маяке<br>• что дописали к заявке<br>• что ответила Амега<br>• кто подтвердил заказ<br>• где дешевле перчатки<br>• кто не подключён к боту</div></div>`}</div>
+    <div class="composer"><textarea id="hq" class="inp" rows="1" placeholder="Ваш вопрос…"></textarea><button class="btn primary" id="hsend">Спросить</button></div>`}
+  else if(sel==='_prob'){R+=`<div class="dh"><div><b>Проблемы</b><small>Что может сорвать поставку. Пусто — всё хорошо.</small></div></div><div class="plist">`+
+    (probs.filter(p=>!p.alert).map(p=>`<div class="pr ${p.k}"><span>${esc(p.t)}</span><button class="btn" data-dl="${esc(p.sup)}">Открыть диалог</button></div>`).join(''))+`<div id="pfeed"></div></div>`}
+  else{const isPt=sel===PT_ID;
+    if(isPt)R+=`<div class="dh"><div><b>${PT} — ${PT_MGR}</b><small>${o?`Заявка на ${dayAcc(d)} ${dm(d)} · ${Object.keys(o.items||{}).length} поз. · ${ST_N[o.status]||''}${o.extra&&Object.keys(o.extra).length?' · дописано: '+Object.keys(o.extra).length:''}`:'Заявки пока нет'}</small></div>${o?`<button class="btn" data-goorder="${d}">Открыть заявку</button>`:''}</div>`+chatBox(PT_ID,'Сообщение для '+PT_MGR,true);
+    else{const c=o?confOf(o,sel):null;
+      R+=`<div class="dh"><div><b>${esc(sel)}</b><small>${on[sel]?'Подключены: '+esc(on[sel].join(', ')):'Не подключён к боту. Код для подключения: '+esc(codes[sel]||'—')}${c?' · заказ '+dm(d)+': '+CONF_N[c][1]:''}</small></div>${o?`<button class="btn" data-goorder="${d}">Заказ ${dm(d)}</button>`:''}</div>`+chatBox(sel,on[sel]?'Сообщение для '+sel:'Станет доступно, когда поставщик подключится',!!on[sel])}}
+  R+='</div>';
+  M.innerHTML=`<div class="dwrap">${L}${R}</div>`;
+  M.querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{S.dlg=b.dataset.dl;S.dlgOpen=true;render()});
+  const bk=$('dback');if(bk)bk.onclick=()=>{S.dlgOpen=false;render()};
+  M.querySelectorAll('[data-goorder]').forEach(b=>b.onclick=()=>{S.buyDate=b.dataset.goorder;S.tab.buy='order';render()});
+  if(sel==='_help'){const go=()=>{const q=$('hq').value.trim();if(!q)return;S.help=S.help||[];S.help.push({q},{a:assist(q)});render()};$('hsend').onclick=go;$('hq').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go()}};const c=$('chatbox');if(c)c.scrollTop=c.scrollHeight}
+  else if(sel==='_prob'){const pf=$('pfeed');if(pf){renderFeed(pf);const lead=pf.querySelector('.lead');if(lead)lead.remove()}}
+  else bindChat(M,sel)}
+// ===== ПОМОЩНИК (без ИИ: понимает типовые вопросы)
+function assist(q0){const q=q0.toLowerCase().replace(/ё/g,'е');const sup=SUPS.find(s=>q.includes(s.toLowerCase().slice(0,4)))||(/омег/.test(q)?'Амега':null);
+  const d=liveOrderDate()||lastOrderDate();const o=d?S.orders[d]:null;const nm=id=>BY_ID[id]?BY_ID[id].n:id;const un=id=>BY_ID[id]?BY_ID[id].u:'';
+  const list=(ids,qs)=>ids.map(id=>`• ${esc(nm(id))} — ${qs[id]} ${esc(un(id))}`).join('<br>');
+  if(/забыл|допис|дозаказ/.test(q)){if(!o||!o.extra||!Object.keys(o.extra).length)return d?`К заявке на ${dm(d)} ничего не дописывали.`:'Заявок пока нет.';
+    return `Дописано к заявке на ${dm(d)}:<br>`+Object.entries(o.extra).map(([id,e])=>`• ${esc(nm(id))} — ${e.qty} ${esc(un(id))} (${esc(e.by||'')}, ${hm(e.at)}${e.why?', '+esc(e.why):''})`).join('<br>')}
+  if(/подключ|код/.test(q)){const on=S.supOn||{},c=S.supCodes||{};return SUPS.map(s=>`• ${s}: ${on[s]?'подключён ✅':'не подключён, код '+esc(c[s]||'—')}`).join('<br>')}
+  if(/подтверд|принял|принят/.test(q)){if(!o)return'Заявок пока нет.';const ss=SUPS.filter(s=>confOf(o,s));if(!ss.length)return`Заказ на ${dm(d)} ещё никому не отправлен.`;return `Заказ на ${dm(d)}:<br>`+ss.map(s=>`• ${s}: ${CONF_N[confOf(o,s)][1]}`).join('<br>')}
+  if(/дешев|дорож|цен|стоит|почем/.test(q)){const w=q.split(/[^a-zа-я0-9]+/).filter(x=>x.length>=4&&!/дешев|дорож|цена|цены|стоит|почем|где|какая|какие|сколько/.test(x));
+    const hits=DATA.filter(x=>w.some(t=>x.n.toLowerCase().includes(t.slice(0,Math.max(4,t.length-2))))).slice(0,6);
+    if(!hits.length)return'Не нашла такой товар в каталоге. Напишите точнее, например «где дешевле мешки 120».';
+    return hits.map(x=>{const ps=supsFor(x).map(s=>[s,priceFor(x,s)]).filter(p=>p[1]!=null).sort((a,b)=>a[1]-b[1]);return `<b>${esc(x.n)}</b><br>`+ps.map((p,i)=>`${i?'':'✅ '}${p[0]}: ${rub(p[1])}`).join(' · ')}).join('<br><br>')}
+  if(/когда|привез|приед|доставк|приход/.test(q)){if(!o)return'Заявок пока нет.';const ss=sup?[sup]:SUPS.filter(s=>o.sent&&o.sent[s]);
+    if(!ss.length)return`Заказ на ${dm(d)} поставщикам ещё не отправлен. Доставка по плану — ${dayAcc(d)} ${dm(d)}.`;
+    return `Доставка по плану — ${dayAcc(d)} ${dm(d)}.<br>`+ss.map(s=>{const c=confOf(o,s);const l=((S.chats||{})[s]||[]).filter(m=>m.from==='sup').slice(-1)[0];return `• ${s}: ${c?CONF_N[c][1]:'заказ не отправлен'}${l?` · последнее сообщение: «${esc(l.text)}» (${hm(l.t)})`:''}`}).join('<br>')}
+  if(sup&&/ответ|написал|сказал|пишет|сообщ/.test(q)){const l=((S.chats||{})[sup]||[]).filter(m=>m.from==='sup').slice(-3);return l.length?`Последнее от ${sup}:<br>`+l.map(m=>`• «${esc(m.text)}» — ${hm(m.t)}`).join('<br>'):`${sup} пока ничего не писал.`}
+  if(/заказ|заявк|взял|брал/.test(q)){if(!o)return'Заявок пока нет.';const items=o.items||{};const al=allocate(o);
+    return `Заявка ${PT} на ${dayAcc(d)} ${dm(d)} — ${ST_N[o.status]||''}, ${Object.keys(items).length} поз.:<br>`+SUPS.map(s=>{const ls=al.lines.filter(l=>l.sup===s);return ls.length?`<b>${s}</b><br>`+ls.map(l=>`• ${esc(l.d.n)} — ${l.qty} ${esc(l.d.u)}`).join('<br>'):''}).filter(Boolean).join('<br>')}
+  const w=q.split(/[^a-zа-я0-9]+/).filter(x=>x.length>=4);const found=[];Object.entries(S.chats||{}).forEach(([id,ms])=>ms.forEach(m=>{if(w.some(t=>(m.text||'').toLowerCase().includes(t)))found.push([id,m])}));
+  if(found.length)return'Нашла в переписке:<br>'+found.slice(-5).map(([id,m])=>`• ${esc(id.replace('pt:',''))}, ${hm(m.t)}: «${esc(m.text)}»`).join('<br>');
+  return'Не поняла вопрос. Попробуйте: «что заказали на Маяке», «что дописали», «что ответила Амега», «кто подтвердил», «где дешевле перчатки».'}
+// ===== УПРАВЛЯЮЩАЯ: написать закупщице / дописать
+function renderMgrMsg(){const L=$('m-msg');const d=liveOrderDate();const o=d?S.orders[d]:null;const ed=can('addExtra');
+  let h=`<div class="dh" style="margin-top:8px"><div><b>Закупщица</b><small>Всё, что нужно сказать по заявке, — сюда. Закупщица увидит сразу, история сохраняется.</small></div></div>`;
+  if(ed){if(o){const ql=(S.xq||'').trim().toLowerCase();const res=ql.length>=2?DATA.filter(x=>x.n.toLowerCase().includes(ql)).slice(0,8):[];
+    h+=`<div class="panel xadd"><h3>➕ Забыли позицию? Допишите к заявке на ${dayAcc(d)} ${dm(d)}</h3><p class="muted" style="margin:0 0 8px">Позиция сама добавится в заявку, закупщица увидит её в заказе${o.status==='sent'?' и отправит поставщику дозаказом':''}.</p>
+      <input type="search" id="xq" class="inp" placeholder="Найти товар: мешки, перчатки…" value="${esc(S.xq||'')}" style="width:100%">
+      ${res.map(x=>`<div class="xrow">${img(x)}<span>${esc(x.n)}<small>${esc(x.u)}${o.items&&o.items[x.id]?' · уже в заявке: '+o.items[x.id]:''}</small></span><input class="inp" type="number" min="1" value="1" data-xqty="${x.id}" aria-label="количество" style="width:70px"><button class="btn primary" data-xadd="${x.id}" ${S.busy?'disabled':''}>Дописать</button></div>`).join('')}
+      ${ql.length>=2&&!res.length?'<p class="muted">Не нашлось. Напишите закупщице сообщением ниже.</p>':''}
+      ${res.length?`<label class="muted" style="font-size:13px">Почему забыли (для статистики): <select id="xwhy"><option>Забыли</option><option>Закончилось раньше</option><option>Новое блюдо / событие</option><option>Другое</option></select></label>`:''}</div>`}
+    else h+=`<div class="banner"><span>Заявка ещё черновик — просто добавьте позицию на вкладке «Заявка».</span></div>`}
+  h+=`<div class="panel">`+chatBox(PT_ID,'Сообщение закупщице…',can('chatSend'))+`</div>`;
+  const hadX=document.activeElement&&document.activeElement.id==='xq';L.innerHTML=h;
+  if($('xq')){$('xq').oninput=e=>{S.xq=e.target.value;renderMgrMsg()};if(hadX){const i=$('xq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+  L.querySelectorAll('[data-xadd]').forEach(b=>b.onclick=async()=>{const id=b.dataset.xadd;const q=parseInt(L.querySelector(`[data-xqty="${id}"]`).value,10)||1;const ok=await act('addExtra',{date:d,id,qty:q,why:$('xwhy')?$('xwhy').value:''});if(ok){S.xq='';render()}});
+  bindChat(L,PT_ID)}
+
 // ===== УПРАВЛЯЮЩАЯ: ПРИЁМКА
 function recvDates(){const t=ymd(nowMsk());const ds=Object.keys(S.orders).filter(d=>d<=t||S.orders[d].status==='sent').sort().reverse().slice(0,6);if(!ds.length){let d=fromYmd(t);while(![2,5].includes(d.getUTCDay()))d=addDays(d,-1);ds.push(ymd(d))}return ds}
 function catalogFor(sup){return DATA.filter(d=>sup==='Капцова'?d.p['Амега']!=null:d.p[sup]!=null)}
