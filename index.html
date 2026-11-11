@@ -257,7 +257,7 @@ let DATA=[],BY_ID={},CATS=[];
 const SUPS=['Амега','Капцова','Костенко','Оптиком'];
 const SC={'Амега':'var(--s-amega)','Капцова':'#4f7fc4','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
 const OPT_MIN=5000;
-const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],sendOrder:['buy','admin'],chatSend:['buy','admin']};
+const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin']};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
@@ -492,7 +492,8 @@ function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
    <div class="rules">${[['buyMin','Минут у закупщицы на один цикл: собрать заявки и разослать поставщикам'],['mgrMin','Минут у управляющей на одну заявку'],['recvMin','Минут у управляющей на одну приёмку'],['spendSep','Расходы Маяка на хозы за сентябрь, ₽'],['spendOct','Расходы Маяка на хозы за октябрь, ₽']].map(([k,l])=>`<label class="rule"><b>${l}</b><input data-bl="${k}" inputmode="decimal" value="${b[k]??''}" ${ed?'':'disabled'} class="inp" style="width:100%;margin-top:6px"></label>`).join('')}</div>${b.at?`<p class="muted" style="font-size:12.5px;margin:8px 0 0">Обновлено ${hm(b.at)}${b.by?' · '+esc(b.by):''}</p>`:''}</div>`;
   h+=`<h2>Договорённости с поставщиками</h2><div class="panel">${rulesList(false)}</div>`;
   h+=`<h2>Журнал</h2><div class="panel"><ul class="log">${S.log.length?S.log.slice(0,60).map(l=>`<li><time>${hm(l.t)}</time>${esc(l.x)}${l.u?` <span class="muted">· ${esc(l.u)}</span>`:''}</li>`).join(''):'<li class="muted">Здесь появятся действия управляющей и закупщицы.</li>'}</ul></div>`;
-  M.innerHTML=h;
+  if(S.role==='admin')h+=`<div class="panel"><h3>Только для Илиды</h3><p class="muted" style="margin:0 0 8px">Перед стартом теста удалить тестовые заявки, приёмки, переписку и журнал. Каталог, пароли и подключения к боту останутся.</p><button class="btn" id="rst">Очистить тестовые данные</button></div>`;
+  M.innerHTML=h;const rb=$('rst');if(rb)rb.onclick=()=>{if(rb.dataset.c){act('resetTest',{})}else{rb.dataset.c=1;rb.textContent='Точно очистить? Нажмите ещё раз'}};
   M.querySelectorAll('[data-bl]').forEach(i=>i.onchange=()=>{const v=parseFloat(String(i.value).replace(',','.').replace(/\s/g,''));act('baseline',{k:i.dataset.bl,v:isNaN(v)?null:v})})}
 // ===== запуск
 (async()=>{PASS=lsGet('guri_pass');WHO=lsGet('guri_who');if(!PASS)return renderLogin('');
