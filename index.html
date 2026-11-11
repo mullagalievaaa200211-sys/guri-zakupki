@@ -218,6 +218,9 @@ nav.roles button[aria-pressed="true"]{background:var(--accent);color:#fff}
 nav.roles{flex-wrap:nowrap}
 @media (max-width:560px){nav.roles button{padding:9px 6px;font-size:13.5px}}
 .inp{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
+.grp{margin:16px 2px 6px;font-size:14px;font-weight:600}
+.chat{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:6px 2px}.msg{max-width:82%;display:flex;flex-direction:column;gap:2px}.msg .b{padding:8px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line);white-space:pre-wrap;overflow-wrap:anywhere}.msg.buy{align-self:flex-end;align-items:flex-end}.msg.buy .b{background:var(--accent-soft);border-color:transparent}.msg.sys{align-self:center;max-width:100%}.msg.sys .b{background:none;border:none;color:var(--muted);font-size:13px;padding:2px}.msg small{color:var(--muted);font-size:12px}.okdot{color:var(--down);font-size:11px}.code{font-family:ui-monospace,monospace;background:var(--accent-soft);padding:1px 6px;border-radius:6px}
+.thumb[data-info]{cursor:zoom-in}dialog.info{border:none;border-radius:16px;padding:0;max-width:min(560px,94vw);width:100%;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.35)}dialog.info::backdrop{background:rgba(0,0,0,.5)}.info .ib img{width:100%;max-height:340px;object-fit:contain;background:#fff;display:block}.info .it{padding:16px 18px 18px}.info h3{margin:4px 0 6px;font-size:17px;line-height:1.35}.itbl{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:13.5px}.itbl th,.itbl td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}.itbl .r{text-align:right;white-space:nowrap}
 </style>
 </head><body>
 <div class="wrap">
@@ -240,7 +243,7 @@ nav.roles{flex-wrap:nowrap}
   <div id="m-recv" hidden></div>
 </section>
 <section id="v-buy" hidden>
-  <div class="subtabs" role="group"><button data-bt="order" aria-pressed="true">Заказ поставщикам</button><button data-bt="feed" aria-pressed="false">Требует внимания <span class="badge" id="bb"></span></button><button data-bt="rules" aria-pressed="false">Договорённости</button></div>
+  <div class="subtabs" role="group"><button data-bt="order" aria-pressed="true">Заказ поставщикам</button><button data-bt="feed" aria-pressed="false">Требует внимания <span class="badge" id="bb"></span></button><button data-bt="chat" aria-pressed="false">Поставщики</button><button data-bt="rules" aria-pressed="false">Договорённости</button></div>
   <div id="b-main"></div>
 </section>
 <section id="v-dir" hidden><div id="d-main"></div></section>
@@ -254,7 +257,7 @@ let DATA=[],BY_ID={},CATS=[];
 const SUPS=['Амега','Капцова','Костенко','Оптиком'];
 const SC={'Амега':'var(--s-amega)','Капцова':'#4f7fc4','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
 const OPT_MIN=5000;
-const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],toMax:['buy','admin']};
+const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],sendOrder:['buy','admin'],chatSend:['buy','admin']};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
@@ -291,6 +294,7 @@ function apply(r){if(!r)return false;if(r.error==='bad_pass'){logout('Парол
   if(r.error==='forbidden'){status('Это действие недоступно для вашей роли.','warn');return false}
   if(r.error==='max')status(r.msg,'warn');
   if(r.error==='locked')status('Закупщица уже отправила заказ поставщикам — изменить нельзя.','warn');
+  if(r.info)status(r.info,'ok');
   if(r.state){Object.assign(S,r.state)}if(r.role)S.role=r.role;return !r.error}
 async function act(action,x){S.busy=true;render();const r=await call(action,x);S.busy=false;const ok=apply(r);render();return ok}
 // ===== каталог и цены
@@ -304,7 +308,12 @@ function allocate(o){const items=o&&o.items||{},ov=o&&o.assign||{};const lines=O
   if(optSum>0&&optSum<OPT_MIN){lines.filter(l=>l.sup==='Оптиком'&&!l.manual).forEach(l=>{const alt=Object.entries(l.d.p).filter(x=>x[0]!=='Оптиком').sort((a,b)=>a[1]-b[1])[0];if(alt){l.sup=alt[0];l.moved=1}});
     if(lines.some(l=>l.moved))notes.push(`У Оптикома набиралось ${rub0(optSum)} — меньше минимума ${rub0(OPT_MIN)}, позиции переложены другим поставщикам.`)}
   return{lines,notes}}
-const img=d=>d&&d.img?`<img class="thumb" src="${d.img}" alt="" loading="lazy">`:'<span class="thumb empty">нет фото</span>';
+const img=d=>d&&d.img?`<img class="thumb" src="${d.img}" alt="" loading="lazy" data-info="${d.id}" title="Подробнее">`:`<span class="thumb empty" data-info="${d?d.id:''}" title="Подробнее">нет фото</span>`;
+function showInfo(id){const d=BY_ID[id];if(!d)return;let m=document.getElementById('infoDlg');if(!m){m=document.createElement('dialog');m.id='infoDlg';m.className='info';document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)m.close()})}
+  const sups=supsFor(d);m.innerHTML=`<div class="ib">${d.img?`<img src="${d.img}" alt="">`:''}<div class="it"><small class="muted">${esc(d.c)}</small><h3>${esc(d.n)}</h3><p class="muted">Единица: ${esc(d.u)}</p>
+  <table class="itbl"><tr><th>Поставщик</th><th>Как называется у них</th><th class="r">Цена</th></tr>${sups.map(s=>`<tr><td>${s}</td><td>${esc((d.sn||{})[s==='Капцова'?'Амега':s]||'—')}</td><td class="r">${rub(priceFor(d,s))}</td></tr>`).join('')}</table>
+  <button class="btn primary" type="button" id="infoClose">Закрыть</button></div></div>`;m.querySelector('#infoClose').onclick=()=>m.close();m.showModal()}
+document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(t&&t.dataset.info){e.preventDefault();e.stopPropagation();showInfo(t.dataset.info)}},true);
 const ROLE_N={mgr:'Управляющая Маяка',buy:'Закупщица',dir:'Руководство',admin:'Администратор'};
 // ===== вход
 function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false;
@@ -351,8 +360,8 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
   if(!locked){const ql=S.q.trim().toLowerCase();
     h+=`<section class="block"><div class="bh"><h3>Каталог</h3><span class="muted">${DATA.length} позиций</span></div><input type="search" id="mq" placeholder="Поиск: губки, мешки 120, перчатки…" value="${esc(S.q)}" aria-label="Поиск по каталогу"><div class="row cats" style="margin-top:8px">${['Все',...CATS].map(c=>`<button type="button" data-c="${esc(c)}" aria-pressed="${S.cat===c}">${esc(c)}</button>`).join('')}</div>`;
     let res=DATA.filter(d=>!u[d.id]&&!(items[d.id]>0));
-    if(ql.length>=2)res=res.filter(d=>d.n.toLowerCase().includes(ql));else if(S.cat!=='Все')res=res.filter(d=>d.c===S.cat);else res=[];
-    h+=res.length?`<div class="list" style="margin-top:8px">${res.slice(0,80).map(row).join('')}</div>`:`<p class="muted" style="margin:8px 2px 0;font-size:13.5px">${ql.length>=2?'Ничего не нашлось.':'Введите 2–3 буквы или выберите раздел.'}</p>`;h+='</section>'}
+    const allMode=ql.length<2&&S.cat==='Все';if(ql.length>=2)res=res.filter(d=>d.n.toLowerCase().includes(ql));else if(!allMode)res=res.filter(d=>d.c===S.cat);
+    h+=allMode&&res.length?CATS.map(c=>{const g=res.filter(d=>d.c===c);return g.length?`<h4 class="grp">${esc(c)} <span class="muted">· ${g.length}</span></h4><div class="list">${g.map(row).join('')}</div>`:''}).join(''):res.length?`<div class="list" style="margin-top:8px">${res.slice(0,120).map(row).join('')}</div>`:`<p class="muted" style="margin:8px 2px 0;font-size:13.5px">${ql.length>=2?'Ничего не нашлось.':'Введите 2–3 буквы или выберите раздел.'}</p>`;h+='</section>'}
   const n=Object.values(items).filter(q=>q>0).length;
   h+=`<div class="sticky"><span><b>Маяк</b>: ${n} позиций${saveTimer||S.busy?' · сохраняю…':''}</span>${o.status==='sent'||ro?'':o.status==='submitted'?'<span>Изменения сохраняются сами</span>':`<button class="btn primary" id="send" ${n&&!S.busy?'':'disabled'}>Отправить закупщице</button>`}</div>`;
   const L=$('m-order');const hadFocus=document.activeElement&&document.activeElement.id==='mq';L.innerHTML=h;
@@ -369,7 +378,18 @@ function queueSave(date){clearTimeout(saveTimer);saveTimer=setTimeout(()=>flushS
 async function flushSave(date){clearTimeout(saveTimer);saveTimer=null;if(!pendingItems)return;const items=pendingItems;const r=await call('saveOrder',{date,items});apply(r);if(pendingItems===items)pendingItems=null;render()}
 // ===== ЗАКУПЩИЦА
 function orderDates(){const set=new Set(Object.keys(S.orders));set.add(currentOrderDate());return[...set].sort().reverse().slice(0,8)}
-function renderBuy(){const M=$('b-main');if(S.tab.buy==='order')return renderBuyOrder(M);if(S.tab.buy==='feed')return renderFeed(M);return renderRules(M)}
+function renderBuy(){const M=$('b-main');if(S.tab.buy==='order')return renderBuyOrder(M);if(S.tab.buy==='feed')return renderFeed(M);if(S.tab.buy==='chat')return renderChat(M);return renderRules(M)}
+function renderChat(M){const codes=S.supCodes||{};const on=S.supOn||{};const sel=S.chatSup||SUPS[0];S.chatSup=sel;
+  let h=`<p class="lead" style="margin-top:12px">Переписка с поставщиками через бота MAX «Гури Закупки». Поставщик подключается один раз: находит бота в MAX, жмёт «Начать» и присылает свой код. Заказы и ответы приходят сюда и вам в MAX.</p><div class="subtabs" role="group">${SUPS.map(s=>`<button data-cs="${s}" aria-pressed="${s===sel}">${s}${on[s]?' <span class="okdot" title="подключён">●</span>':''}</button>`).join('')}</div>`;
+  h+=`<div class="panel">${on[sel]?`<p class="muted" style="margin-top:0">Подключены: ${esc(on[sel].join(', '))}</p>`:`<p class="muted" style="margin-top:0">${sel} ещё не подключён к боту.${codes[sel]?` Код для подключения: <b class="code">${esc(codes[sel])}</b>`:''}</p>`}`;
+  const ms=((S.chats||{})[sel]||[]).slice(-80);
+  h+=`<div class="chat" id="chatbox">${ms.length?ms.map(m=>`<div class="msg ${m.from}"><div class="b">${esc(m.text||'')}${(m.att||[]).map(a=>`${m.text?'<br>':''}<a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name||(a.type==='image'?'фото':'файл'))}</a>`).join('')}</div>${m.from==='sys'?'':`<small>${m.from==='sup'?esc(m.name||sel):esc(m.name||'Закупщица')} · ${hm(m.t)}</small>`}</div>`).join(''):'<p class="muted">Сообщений пока нет.</p>'}</div>`;
+  if(can('chatSend'))h+=`<div class="row" style="margin-top:10px"><textarea id="ct" class="inp" rows="2" style="flex:1;min-width:200px" placeholder="${on[sel]?'Сообщение для '+sel:'Станет доступно, когда поставщик подключится'}" ${on[sel]?'':'disabled'}></textarea><button class="btn primary" id="csend" ${on[sel]&&!S.busy?'':'disabled'}>Отправить</button></div>`;
+  M.innerHTML=h+'</div>';
+  M.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{S.chatSup=b.dataset.cs;render()});
+  const ta=$('ct');if(ta){ta.value=(S.draft||{})[sel]||'';ta.oninput=()=>{S.draft=S.draft||{};S.draft[sel]=ta.value}}
+  const cb=$('csend');if(cb)cb.onclick=async()=>{const t=ta.value.trim();if(!t)return;const ok=await act('chatSend',{sup:sel,text:t});if(ok){S.draft=S.draft||{};S.draft[sel]='';render()}};
+  const c=$('chatbox');if(c)c.scrollTop=c.scrollHeight}
 function orderText(date,lines){return `Заказ Гури Маяк (ул. Приморская 2/4) на ${dayAcc(date)} ${dm(date)}:\n`+lines.map((l,i)=>`${i+1}. ${l.d.n} — ${l.qty} ${l.d.u}`).join('\n')+'\nСпасибо!'}
 function renderBuyOrder(M){const dates=orderDates();const date=S.buyDate&&dates.includes(S.buyDate)?S.buyDate:(dates.find(d=>S.orders[d]&&S.orders[d].status==='submitted')||currentOrderDate());S.buyDate=date;
   const o=S.orders[date]||{};const al=allocate(o);const sent=o.sent||{};const ed=can('markSent');
@@ -380,13 +400,14 @@ function renderBuyOrder(M){const dates=orderDates();const date=S.buyDate&&dates.
   const tot=al.lines.reduce((a,l)=>a+priceFor(l.d,l.sup)*l.qty,0);
   h+=`<p class="lead" style="margin-top:12px">Заявка разложена по самым выгодным ценам. Поставщика у строки можно поменять. Ориентировочно ${rub0(tot)}.</p>`;
   SUPS.forEach(s=>{const ls=al.lines.filter(l=>l.sup===s);if(!ls.length)return;const sum=ls.reduce((a,l)=>a+priceFor(l.d,s)*l.qty,0);
-    h+=`<div class="sup"><div class="h"><span><span class="dot" style="background:${SC[s]}"></span><b>${s}</b> <span class="muted">· ${ls.length} строк · ${rub0(sum)}</span></span>${sent[s]?`<span class="st ok">Отправлено ${hm(sent[s].at)}</span>`:`<span class="row"><button class="btn" data-copy="${s}">Скопировать заказ</button>${S.maxOn&&can('toMax')?`<button class="btn" data-max="${s}" ${S.busy?'disabled':''}>Прислать мне в MAX</button>`:''}${ed?`<button class="btn primary" data-sent="${s}" ${S.busy?'disabled':''}>Отметить: отправлено</button>`:''}</span>`}</div>
+    h+=`<div class="sup"><div class="h"><span><span class="dot" style="background:${SC[s]}"></span><b>${s}</b> <span class="muted">· ${ls.length} строк · ${rub0(sum)}</span></span>${sent[s]?`<span class="st ok">Отправлено ${hm(sent[s].at)}</span>`:`<span class="row"><button class="btn" data-copy="${s}">Скопировать заказ</button>${can('sendOrder')&&(S.maxOn||(S.supOn||{})[s])?`<button class="btn" data-max="${s}" ${S.busy?'disabled':''}>${(S.supOn||{})[s]?'Отправить в MAX':'Прислать мне в MAX'}</button>`:''}${ed?`<button class="btn primary" data-sent="${s}" ${S.busy?'disabled':''}>Отметить: отправлено</button>`:''}</span>`}</div>
     <div class="tbl"><table><tr><th>Позиция</th><th class="r">Кол-во</th><th class="r">Цена</th><th>Поставщик</th></tr>${ls.map(l=>`<tr><td>${esc(l.d.n)}${l.moved?' <span class="flag">переложено</span>':''}</td><td class="r">${l.qty} ${esc(l.d.u)}</td><td class="r">${rub(priceFor(l.d,s))}${lastP(l.d.id,s)!=null?'':' <small class="muted">прайс</small>'}</td><td><select data-asg="${l.d.id}" ${ed&&!sent[s]?'':'disabled'} aria-label="поставщик">${supsFor(l.d).map(x=>`<option ${x===s?'selected':''}>${x}</option>`).join('')}</select></td></tr>`).join('')}</table></div></div>`});
   M.innerHTML=h;
   $('bd').onchange=e=>{S.buyDate=e.target.value;render()};
   M.querySelectorAll('[data-asg]').forEach(sel=>sel.onchange=()=>act('assign',{date,id:sel.dataset.asg,sup:sel.value,name:BY_ID[sel.dataset.asg].n.slice(0,50)}));
   M.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const s=b.dataset.copy;const t=orderText(date,al.lines.filter(l=>l.sup===s));try{await navigator.clipboard.writeText(t);b.textContent='Скопировано ✓'}catch(e){const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='width:100%;min-height:160px;margin-top:8px';b.closest('.sup').appendChild(ta);ta.select();b.textContent='Выделите и скопируйте'}});
-  M.querySelectorAll('[data-max]').forEach(b=>b.onclick=async()=>{const s=b.dataset.max;const ok=await act('toMax',{date,sup:s,text:orderText(date,al.lines.filter(l=>l.sup===s))});if(ok)status('Заказ '+s+' пришёл вам в MAX — перешлите его поставщику.','ok')});
+  M.querySelectorAll('[data-max]').forEach(b=>b.onclick=()=>{const s=b.dataset.max;const ls=al.lines.filter(l=>l.sup===s);const sups=[...new Set(al.lines.map(l=>l.sup))];const all=sups.every(x=>x===s||sent[x]);status('Отправляю '+s+'…');
+    act('sendOrder',{date,sup:s,ids:ls.map(l=>l.d.id),all,lines:ls.map(l=>({id:l.d.id,qty:l.qty,price:priceFor(l.d,s)}))})});
   M.querySelectorAll('[data-sent]').forEach(b=>b.onclick=()=>{const s=b.dataset.sent;const sups=[...new Set(al.lines.map(l=>l.sup))];const all=sups.every(x=>x===s||sent[x]);
     act('markSent',{date,sup:s,ids:al.lines.filter(l=>l.sup===s).map(l=>l.d.id),all})})}
 function renderFeed(M){const open=S.alerts.filter(a=>a.status==='open').sort((a,b)=>(b.at||'').localeCompare(a.at||''));const closed=S.alerts.filter(a=>a.status!=='open').sort((a,b)=>(b.closedAt||'').localeCompare(a.closedAt||'')).slice(0,15);
