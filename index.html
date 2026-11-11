@@ -243,7 +243,7 @@ nav.roles{flex-wrap:nowrap}
   <div id="m-recv" hidden></div>
 </section>
 <section id="v-buy" hidden>
-  <div class="subtabs" role="group"><button data-bt="order" aria-pressed="true">Заказ поставщикам</button><button data-bt="feed" aria-pressed="false">Требует внимания <span class="badge" id="bb"></span></button><button data-bt="chat" aria-pressed="false">Поставщики</button><button data-bt="rules" aria-pressed="false">Договорённости</button></div>
+  <div class="subtabs" role="group"><button data-bt="order" aria-pressed="true">Заказ поставщикам</button><button data-bt="feed" aria-pressed="false">Требует внимания <span class="badge" id="bb"></span></button><button data-bt="chat" aria-pressed="false">Поставщики <span class="badge" id="bc"></span></button><button data-bt="rules" aria-pressed="false">Договорённости</button></div>
   <div id="b-main"></div>
 </section>
 <section id="v-dir" hidden><div id="d-main"></div></section>
@@ -339,6 +339,10 @@ function render(){if(!S.ready)return;const v=S.view||'mgr';
   const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='заявка '+cutText(cd);
   $('whoN').textContent=(WHO||'—')+' · '+(ROLE_N[S.role]||'');$('busy').hidden=!S.busy;
   $('bb').textContent=S.alerts.filter(a=>a.status==='open').length||'';
+  {const seen=JSON.parse(lsGet('guri_seen')||'{}');const un=s=>((S.chats||{})[s]||[]).filter(m=>m.from==='sup'&&m.t>(seen[s]||'')).length;
+   S.chatSup=S.chatSup||SUPS[0];if((S.view||'mgr')==='buy'&&S.tab.buy==='chat'&&un(S.chatSup)){const ms=(S.chats||{})[S.chatSup]||[];seen[S.chatSup]=ms.length?ms[ms.length-1].t:'';lsSet('guri_seen',JSON.stringify(seen))}
+   S.unread=Object.fromEntries(SUPS.map(s=>[s,can('chatSend')?un(s):0]));const tot=Object.values(S.unread).reduce((a,b)=>a+b,0);
+   $('bc').textContent=tot||'';document.title=(tot?'('+tot+') ':'')+'Хозы Гури · Маяк'}
   if(v==='mgr'){document.querySelectorAll('[data-mt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mt===S.tab.mgr));$('m-order').hidden=S.tab.mgr!=='order';$('m-recv').hidden=S.tab.mgr!=='recv';S.tab.mgr==='order'?renderOrder():renderRecv()}
   if(v==='buy'){document.querySelectorAll('[data-bt]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.bt===S.tab.buy));renderBuy()}
   if(v==='dir')renderDir()}
@@ -380,7 +384,7 @@ async function flushSave(date){clearTimeout(saveTimer);saveTimer=null;if(!pendin
 function orderDates(){const set=new Set(Object.keys(S.orders));set.add(currentOrderDate());return[...set].sort().reverse().slice(0,8)}
 function renderBuy(){const M=$('b-main');if(S.tab.buy==='order')return renderBuyOrder(M);if(S.tab.buy==='feed')return renderFeed(M);if(S.tab.buy==='chat')return renderChat(M);return renderRules(M)}
 function renderChat(M){const codes=S.supCodes||{};const on=S.supOn||{};const sel=S.chatSup||SUPS[0];S.chatSup=sel;
-  let h=`<p class="lead" style="margin-top:12px">Переписка с поставщиками через бота MAX «Гури Закупки». Поставщик подключается один раз: находит бота в MAX, жмёт «Начать» и присылает свой код. Заказы и ответы приходят сюда и вам в MAX.</p><div class="subtabs" role="group">${SUPS.map(s=>`<button data-cs="${s}" aria-pressed="${s===sel}">${s}${on[s]?' <span class="okdot" title="подключён">●</span>':''}</button>`).join('')}</div>`;
+  let h=`<p class="lead" style="margin-top:12px">Переписка с поставщиками через бота MAX «Гури Закупки». Поставщик подключается один раз: находит бота в MAX, жмёт «Начать» и присылает свой код. Заказы и ответы приходят сюда и вам в MAX.</p><div class="subtabs" role="group">${SUPS.map(s=>`<button data-cs="${s}" aria-pressed="${s===sel}">${s}${on[s]?' <span class="okdot" title="подключён">●</span>':''}${(S.unread||{})[s]?` <span class="badge">${S.unread[s]}</span>`:''}</button>`).join('')}</div>`;
   h+=`<div class="panel">${on[sel]?`<p class="muted" style="margin-top:0">Подключены: ${esc(on[sel].join(', '))}</p>`:`<p class="muted" style="margin-top:0">${sel} ещё не подключён к боту.${codes[sel]?` Код для подключения: <b class="code">${esc(codes[sel])}</b>`:''}</p>`}`;
   const ms=((S.chats||{})[sel]||[]).slice(-80);
   h+=`<div class="chat" id="chatbox">${ms.length?ms.map(m=>`<div class="msg ${m.from}"><div class="b">${esc(m.text||'')}${(m.att||[]).map(a=>`${m.text?'<br>':''}<a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name||(a.type==='image'?'фото':'файл'))}</a>`).join('')}</div>${m.from==='sys'?'':`<small>${m.from==='sup'?esc(m.name||sel):esc(m.name||'Закупщица')} · ${hm(m.t)}</small>`}</div>`).join(''):'<p class="muted">Сообщений пока нет.</p>'}</div>`;
