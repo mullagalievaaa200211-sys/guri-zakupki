@@ -242,6 +242,37 @@ nav.roles{flex-wrap:nowrap}
 .xrow{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.xrow span{display:flex;flex-direction:column}.xrow small{color:var(--muted)}
 .xadd h3{margin:0 0 4px;font-size:15px}
 @media (max-width:760px){.dwrap{grid-template-columns:1fr}.hide-m{display:none!important}.back-m{display:inline-flex}.xrow{grid-template-columns:40px 1fr;}.xrow input,.xrow button{grid-column:2}}
+
+.frm{display:grid;grid-template-columns:220px 1fr;gap:12px 14px;align-items:end;margin-top:6px}
+.fl{display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--muted);font-weight:600}.fl em{font-weight:400;font-style:normal}
+.fl.wide{grid-column:span 1}.fl select,.fl input,.fl textarea{width:100%;box-sizing:border-box;font:inherit;font-size:15px}
+.frm .btn{height:44px}
+@media (max-width:560px){
+  .wrap{padding-left:12px!important;padding-right:12px!important}
+  .appbar{padding:12px 14px;gap:8px;border-radius:14px}
+  .appbar .brand b{font-size:16px}.appbar .brand small{font-size:12px}.appbar .mark{width:36px;height:36px;font-size:18px}
+  .appbar .next{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;width:100%;padding-top:8px;border-top:1px solid rgba(127,127,127,.25)}
+  .appbar .next small{width:100%;font-size:11px}.appbar .next b{font-size:15px}.appbar .next span{font-size:12.5px}
+  .who-line{font-size:13px;margin-top:12px}
+  .roles button{font-size:13px;padding:9px 4px}
+  .subtabs{gap:0}.subtabs button{flex:1;padding:10px 4px;font-size:13.5px}
+  .panel{padding:14px}
+  .panel h3{font-size:16px}
+  .frm{grid-template-columns:1fr}.frm .btn{width:100%}
+  .row{gap:8px}
+  .composer{flex-direction:column;align-items:stretch}.composer .btn{width:100%}
+  .dh{flex-wrap:wrap}
+  .btn.big,.btn.urgent{font-size:15px}
+  .sup .h{flex-direction:column;align-items:flex-start;gap:8px}
+  .sup .h .row{flex-wrap:wrap}
+  .sup .tbl table{display:block;width:100%}.sup .tbl tbody{display:block}
+  .sup .tbl tr:first-child{display:none}
+  .sup .tbl tr{display:grid;grid-template-columns:auto auto 1fr;gap:6px 14px;padding:10px 14px;border-bottom:1px solid var(--line);align-items:center}
+  .sup .tbl td{border:0!important;padding:0!important;text-align:left!important}
+  .sup .tbl td:first-child{grid-column:1/-1;font-weight:600}
+  .sup .tbl td select{width:100%}
+}
+.done{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:14.5px;line-height:1.5}.dl2 summary{cursor:pointer;color:var(--muted);font-size:14px}.dl2 ul{margin:6px 0 0;padding-left:20px;font-size:14px;color:var(--muted)}
 </style>
 </head><body>
 <div class="wrap">
@@ -456,7 +487,10 @@ function rulesList(edit){const a=S.rules.filter(r=>r.active).sort((x,y)=>(y.at||
   return a.length?a.map(r=>`<div class="rule-row"><span><b>${esc(r.sup)}</b> — ${esc(r.text)}<small>с ${hm(r.at)}${r.until?' · до '+dm(r.until):''} · ${esc(r.by)}</small></span>${edit&&can('offRule')?`<button class="btn" data-rr="${r._id}">Отменить</button>`:'<span></span>'}</div>`).join(''):'<p class="muted">Пока ничего не записано.</p>'}
 function renderRules(M){const ed=can('addRule');
   M.innerHTML=`<div class="panel"><h3>Записать договорённость</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Что сказал поставщик: новая цена, минималка, чего нет в наличии. Запись видят руководство и управляющая.</p>
-   <div class="row"><select id="rs">${['Все',...SUPS].map(s=>`<option>${s}</option>`).join('')}</select><input id="rt" class="inp" placeholder="Например: Оптиком поднял минималку до 7 000 ₽" style="flex:1;min-width:200px"><label class="muted" style="font-size:13px">до <input type="date" id="ru" class="inp"></label><button class="btn primary" id="radd" ${ed?'':'disabled'}>Записать</button></div></div>
+   <div class="frm"><label class="fl"><span>Поставщик</span><select id="rs">${['Все поставщики',...SUPS].map(s=>`<option value="${s==='Все поставщики'?'Все':s}">${s}</option>`).join('')}</select></label>
+   <label class="fl wide"><span>Что договорились</span><textarea id="rt" class="inp" rows="2" placeholder="Например: Оптиком поднял минималку до 7 000 ₽"></textarea></label>
+   <label class="fl"><span>Действует до <em>(необязательно)</em></span><input type="date" id="ru" class="inp"></label>
+   <button class="btn primary" id="radd" ${ed?'':'disabled'}>Записать</button></div></div>
    <div class="panel"><h3>Действующие договорённости</h3>${rulesList(true)}</div>`;
   $('radd').onclick=async()=>{const text=$('rt').value.trim();if(!text)return;await act('addRule',{sup:$('rs').value,text,until:$('ru').value||null})};
   M.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>act('offRule',{id:b.dataset.rr}))}
@@ -570,7 +604,11 @@ function renderRecv(){const L=$('m-recv');const dates=recvDates();const date=S.r
 const inp='font:inherit;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)';
 function recvCard(date,s,al){const D=draftFor(date,s);const ordered=al.lines.filter(l=>l.sup===s);const cat=catalogFor(s);const ro=!can('saveReceipt');
   const opt=sel=>`<option value="">— нет в каталоге —</option>`+cat.map(d=>`<option value="${d.id}" ${d.id===sel?'selected':''}>${esc(d.n.slice(0,70))}</option>`).join('');
-  let h=`<div class="sup"><div class="h"><span><span class="dot" style="background:${SC[s]||'var(--muted)'}"></span><b>${s}</b> <span class="muted">· заказано ${ordered.length} позиций</span></span>${D.saved?'<span class="st ok">Принято</span>':'<span class="st warn">Не принято</span>'}</div><div style="padding:12px 16px;display:grid;gap:10px">`;
+  let h=`<div class="sup"><div class="h"><span><span class="dot" style="background:${SC[s]||'var(--muted)'}"></span><b>${s}</b> <span class="muted">· заказано ${ordered.length} позиций</span></span>${D.saved?'<span class="st ok">✅ Принято</span>':'<span class="st warn">Не принято</span>'}</div><div style="padding:12px 16px;display:grid;gap:10px">`;
+  if(D.saved&&!D.edit){const sv=(S.receipts[date]&&S.receipts[date].sups||{})[s]||{};const ls=sv.lines||[];const sum=ls.reduce((a,l)=>a+(Number(l.qty)||0)*(Number(l.price)||0),0);
+    h+=`<div class="done"><b>Приёмка сохранена.</b> ${esc(sv.by||'')}${sv.at?', '+dm(sv.at.slice(0,10))+' в '+hm(sv.at):''} · ${ls.length} строк · ${rub0(sum)}${(sv.photos||[]).length?' · фото: '+sv.photos.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener">${i+1}</a>`).join(', '):' · без фото'}</div>
+    <details class="dl2"><summary>Что принято (${ls.length})</summary><ul>${ls.map(l=>`<li>${esc(l.item&&BY_ID[l.item]?BY_ID[l.item].n:(l.name||'позиция'))} — ${l.qty} × ${rub(l.price||0)}</li>`).join('')}</ul></details>
+    ${ro?'':`<div class="row"><button class="btn" data-redo="${s}">Изменить приёмку</button></div>`}</div></div>`;return h}
   if(!ro)h+=`<div class="row"><label class="btn" for="ph-${s}">📷 ${D.files.length?'Ещё фото':'Сфотографировать'}</label><input type="file" accept="image/*" capture="environment" id="ph-${s}" data-ph="${s}" hidden><label class="btn" for="pg-${s}">🖼 Из галереи</label><input type="file" accept="image/*" multiple id="pg-${s}" data-ph="${s}" hidden><span class="muted">${D.files.length?D.files.length+' новых фото':''}</span>${D.photos.length?`<span class="pill ok">${D.photos.length} фото сохранено</span>`:''}</div>`;
   if(D.lines.length){h+=`<div class="tbl"><table><tr><th>Позиция в накладной</th><th class="r">Кол-во</th><th class="r">Цена с НДС</th><th>Проверка</th><th></th></tr>`+D.lines.map((ln,i)=>{const oq=ln.item&&ordered.find(l=>l.d.id===ln.item);
       return `<tr><td><select data-ln="${s}|${i}|item" style="max-width:280px" ${ro?'disabled':''}>${opt(ln.item)}</select>${!ln.item?`<input data-ln="${s}|${i}|name" value="${esc(ln.name)}" placeholder="как в накладной" style="display:block;margin-top:4px;width:100%;${inp}" ${ro?'disabled':''}>`:''}</td><td class="r"><input data-ln="${s}|${i}|qty" value="${ln.qty??''}" inputmode="decimal" style="width:64px;text-align:right;${inp}" ${ro?'disabled':''}>${oq?`<small class="muted" style="display:block">заказ ${oq.qty}</small>`:''}</td><td class="r"><input data-ln="${s}|${i}|price" value="${ln.price??''}" inputmode="decimal" style="width:84px;text-align:right;${inp}" ${ro?'disabled':''}></td><td>${lineFlag(ln,s)}${oq&&ln.qty<oq.qty?` <span class="flag">меньше заказа</span>`:''}${ln.item&&!oq?' <span class="flag">не заказывали</span>':''}</td><td>${ro?'':`<button class="btn" data-del="${s}|${i}" aria-label="удалить строку">×</button>`}</td></tr>`}).join('')+`</table></div>`;
@@ -588,7 +626,8 @@ function bindRecv(date,al){const L=$('m-recv');
   L.querySelectorAll('[data-tot]').forEach(i=>i.onchange=()=>{const D=draftFor(date,i.dataset.tot);D.total=parseFloat(String(i.value).replace(',','.').replace(/\s/g,''))||null;render()});
   L.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const[s,k]=b.dataset.del.split('|');const D=draftFor(date,s);D.lines.splice(+k,1);D.saved=false;render()});
   L.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{draftFor(date,b.dataset.add).lines.push({name:'',item:null,qty:1,price:0});render()});
-  L.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveReceipt(date,b.dataset.save,al))}
+  L.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveReceipt(date,b.dataset.save,al));
+  L.querySelectorAll('[data-redo]').forEach(b=>b.onclick=()=>{draftFor(date,b.dataset.redo).edit=true;render()})}
 async function saveReceipt(date,s,al){const D=draftFor(date,s);const ordered=al.lines.filter(l=>l.sup===s);const lines=D.lines.filter(l=>l.name||l.item);
   const total=Math.round(lines.reduce((a,l)=>a+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;const nm=id=>BY_ID[id]?BY_ID[id].n:'позиция';const alerts=[];
   lines.forEach(l=>{if(!l.item||!l.price)return;const r=refPrice(l.item,s);if(r.v==null)return;const k=l.price/r.v;
