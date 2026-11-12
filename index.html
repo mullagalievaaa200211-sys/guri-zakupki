@@ -205,6 +205,8 @@ nav.roles button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .screen-h h2{margin:0;font-size:20px}
 .screen-h p{margin:4px 0 0;font-size:14px}
 .pill{font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.pill.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.banner.review{display:block}.banner.review ul{margin:4px 0 0 18px;padding:0}.notes p{margin:8px 0 0;padding:8px 10px;background:var(--bg);border-radius:8px}.was{color:var(--warn)}
 .pill.ok{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
 .block{margin-top:22px}
 .bh{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin:0 2px 8px}
@@ -307,10 +309,10 @@ nav.roles{flex-wrap:nowrap}
 <script>
 // ===== Гури · Закупки хозов — версия на Google Таблице =====
 let DATA=[],BY_ID={},CATS=[];
-const SUPS=['Амега','Капцова','Костенко','Оптиком'];
-const SC={'Амега':'var(--s-amega)','Капцова':'#4f7fc4','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
+const SUPS=['Амега','Костенко','Оптиком'];
+const SC={'Амега':'var(--s-amega)','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
 const OPT_MIN=5000;
-const CAN={saveOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin']};
+const CAN={saveOrder:['mgr','admin','stf'],approve:['mgr','admin'],returnOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin']};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
@@ -351,8 +353,8 @@ function apply(r){if(!r)return false;if(r.error==='bad_pass'){logout('Парол
   if(r.state){Object.assign(S,r.state)}if(r.role)S.role=r.role;return !r.error}
 async function act(action,x){S.busy=true;render();const r=await call(action,x);S.busy=false;const ok=apply(r);render();return ok}
 // ===== каталог и цены
-function baseP(d,s){return s==='Капцова'?d.p['Амега']:d.p[s]}
-function supsFor(d){const s=Object.keys(d.p);if(s.includes('Амега'))s.splice(s.indexOf('Амега')+1,0,'Капцова');return s}
+function baseP(d,s){return d.p[s]}
+function supsFor(d){return Object.keys(d.p)}
 function lastP(id,s){const r=S.prices[id]&&S.prices[id][s];return r?r.price:null}
 function priceFor(d,s){return lastP(d.id,s)??baseP(d,s)}
 function defaultSup(d){const e=Object.entries(d.p).sort((a,b)=>a[1]-b[1]);if(d.f&&d.p['Амега']!=null)return 'Амега';return e[0][0]}
@@ -364,13 +366,13 @@ function allocate(o){const items=o&&o.items||{},ov=o&&o.assign||{};const lines=O
 const img=d=>d&&d.img?`<img class="thumb" src="${d.img}" alt="" loading="lazy" data-info="${d.id}" title="Подробнее">`:`<span class="thumb empty" data-info="${d?d.id:''}" title="Подробнее">нет фото</span>`;
 function showInfo(id){const d=BY_ID[id];if(!d)return;let m=document.getElementById('infoDlg');if(!m){m=document.createElement('dialog');m.id='infoDlg';m.className='info';document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)m.close()})}
   const sups=supsFor(d);m.innerHTML=`<div class="ib">${d.img?`<img src="${d.img}" alt="">`:''}<div class="it"><small class="muted">${esc(d.c)}</small><h3>${esc(d.n)}</h3><p class="muted">Единица: ${esc(d.u)}</p>
-  <table class="itbl"><tr><th>Поставщик</th><th>Как называется у них</th><th class="r">Цена</th></tr>${sups.map(s=>`<tr><td>${s}</td><td>${esc((d.sn||{})[s==='Капцова'?'Амега':s]||'—')}</td><td class="r">${rub(priceFor(d,s))}</td></tr>`).join('')}</table>
+  <table class="itbl"><tr><th>Поставщик</th><th>Как называется у них</th><th class="r">Цена</th></tr>${sups.map(s=>`<tr><td>${s}</td><td>${esc((d.sn||{})[s]||'—')}</td><td class="r">${rub(priceFor(d,s))}</td></tr>`).join('')}</table>
   <button class="btn primary" type="button" id="infoClose">Закрыть</button></div></div>`;m.querySelector('#infoClose').onclick=()=>m.close();m.showModal()}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(t&&t.dataset.info){e.preventDefault();e.stopPropagation();showInfo(t.dataset.info)}},true);
-const ROLE_N={mgr:'Управляющая Маяка',buy:'Закупщица',dir:'Руководство',admin:'Администратор'};
+const ROLE_N={mgr:'Управляющая Маяка',stf:'Менеджер Маяка',buy:'Закупщица',dir:'Руководство',admin:'Администратор'};
 // ===== вход
 function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false;
-  L.innerHTML=`<div class="panel" style="max-width:420px;margin:28px auto"><h3 style="font-size:18px">Вход</h3><p class="muted" style="margin:0 0 12px;font-size:14px">Пароль выдаёт Илида: у управляющей, закупщицы и руководства — свой.</p>
+  L.innerHTML=`<div class="panel" style="max-width:420px;margin:28px auto"><h3 style="font-size:18px">Вход</h3><p class="muted" style="margin:0 0 12px;font-size:14px">Пароль выдаёт Илида: у управляющей, менеджеров, закупщицы и руководства — свой.</p>
   <form id="lf" style="display:grid;gap:10px"><label>Ваше имя<input id="ln" value="${esc(WHO||lsGet('guri_who'))}" required autocomplete="name" style="width:100%;margin-top:4px;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)"></label>
   <label>Пароль<input id="lp" type="password" required autocomplete="current-password" style="width:100%;margin-top:4px;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)"></label>
   ${msg?`<div class="note">${esc(msg)}</div>`:''}<button class="btn primary" id="lb">Войти</button></form></div>`;
@@ -379,7 +381,7 @@ function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false
     lsSet('guri_pass',PASS);lsSet('guri_who',WHO);start(r)}}
 function logout(msg){PASS='';status('');S.recv={};clearInterval(start.t);lsSet('guri_pass','');S.ready=false;renderLogin(msg)}
 function start(r){DATA=r.catalog||[];BY_ID=Object.fromEntries(DATA.map(d=>[d.id,d]));CATS=[...new Set(DATA.map(d=>d.c))];apply(r);
-  S.view={mgr:'mgr',buy:'buy',dir:'dir',admin:'mgr'}[S.role];S.ready=true;$('login').hidden=true;$('app').hidden=false;render();
+  S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir',admin:'mgr'}[S.role];if(S.role==='stf')S.tab.mgr='order';S.ready=true;$('login').hidden=true;$('app').hidden=false;render();
   clearInterval(start.t);start.t=setInterval(async()=>{if(document.hidden||S.busy||pendingItems||start.ping)return;const ae=document.activeElement;if(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))return;start.ping=1;try{
     let fresh=!window.GURI_API||++start.n%12===0;if(!fresh){const p=await call('ping');fresh=p&&p.rev&&p.rev!==S.rev}
     if(fresh){const before=S.unread?{...S.unread}:{};const x=await call('state');if(x&&!x.error){apply(x);render();const nw=SUPS.filter(s=>(S.unread||{})[s]>(before[s]||0));if(nw.length&&can('chatSend'))status('Новое сообщение от '+nw.join(', ')+' — вкладка «Поставщики».','ok')}}}finally{start.ping=0}},window.GURI_API?5000:30000);start.n=0}
@@ -388,7 +390,7 @@ document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{S.view=b.data
 document.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{S.tab.mgr=b.dataset.mt;render()});
 document.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{S.tab.buy=b.dataset.bt;render()});
 $('out').onclick=()=>logout('');
-function render(){if(!S.ready)return;const v=S.view||'mgr';
+function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=S.role==='stf';document.querySelectorAll('[data-mt="recv"],[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===v));
   ['mgr','buy','dir'].forEach(r=>$('v-'+r).hidden=r!==v);
   const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='заявка '+cutText(cd);
@@ -402,14 +404,26 @@ function render(){if(!S.ready)return;const v=S.view||'mgr';
 let saveTimer=null,pendingItems=null;
 function usualQty(){const res={};Object.entries(S.orders).filter(([k,o])=>o.status==='sent'||o.status==='submitted').sort((a,b)=>b[0].localeCompare(a[0])).slice(0,6).forEach(([k,o])=>{Object.entries(o.items||{}).forEach(([id,q])=>{(res[id]=res[id]||[]).push(q)})});
   const u={};Object.entries(res).forEach(([id,a])=>{const s=[...a].sort((x,y)=>x-y);u[id]=s[Math.floor(s.length/2)]});return u}
-function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};const items=pendingItems||{...(o.items||{})};const ro=!can('saveOrder');const locked=o.status==='sent'||ro;const u=usualQty();
-  let h=`<div class="screen-h"><div><h2>Заявка на ${dayAcc(date)}, ${dm(date)}</h2><p class="muted">Отправить закупщице ${cutText(date)}</p></div>${o.status==='sent'?'<span class="pill ok">Ушла поставщикам</span>':o.status==='submitted'?`<span class="pill ok">У закупщицы${o.submittedAt?' · '+hm(o.submittedAt):''}</span>`:'<span class="pill">Черновик</span>'}</div>`;
+function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};const items=pendingItems||{...(o.items||{})};const ro=!can('saveOrder');const locked=o.status==='sent'||ro||(S.role==='stf'&&['review','submitted'].includes(o.status));const u=usualQty();
+  const stf=S.role==='stf',rev=o.status==='review',ret=o.status==='returned';const stLock=stf&&(rev||o.status==='submitted');const snap=o.reviewSnap||null;
+  let h=`<div class="screen-h"><div><h2>Заявка на ${dayAcc(date)}, ${dm(date)}</h2><p class="muted">${stf?'Отправить Анне на проверку':'Отправить закупщице'} ${cutText(date)}</p></div>${o.status==='sent'?'<span class="pill ok">Ушла поставщикам</span>':o.status==='submitted'?`<span class="pill ok">У закупщицы${o.submittedAt?' · '+hm(o.submittedAt):''}</span>`:rev?'<span class="pill warn">У Анны на проверке</span>':ret?'<span class="pill warn">Вернули на доработку</span>':'<span class="pill">Черновик</span>'}</div>`;
+  const notes=(o.notes||[]).slice(-3);const notesH=notes.length?`<div class="notes">${notes.map(n=>`<p><b>${esc(n.by||'Анна')}</b> <small>${hm(n.at)}</small><br>«${esc(n.text)}»</p>`).join('')}</div>`:'';
+  const diffL=snap?Object.keys({...snap,...(o.items||{})}).filter(id=>(Number(snap[id])||0)!==(Number((o.items||{})[id])||0)&&BY_ID[id]).map(id=>{const a=Number(snap[id])||0,b=Number((o.items||{})[id])||0;return `<li>${esc(BY_ID[id].n)}: ${b?(a?a+' → '+b:'добавлено '+b):'убрано'} ${b?esc(BY_ID[id].u):''}</li>`}):[];
+  if(stf){
+    if(rev)h+=`<div class="banner"><span>Заявка у Анны на проверке${o.reviewAt?' с '+hm(o.reviewAt):''}. Пока она смотрит, менять нельзя. Ответ придёт в MAX и сюда.</span></div>`;
+    if(ret)h+=`<div class="banner warn review"><div><b>Анна вернула заявку — исправьте и отправьте снова</b>${notesH}${diffL.length?`<p style="margin:6px 0 0">Анна уже поправила сама:</p><ul>${diffL.join('')}</ul>`:''}</div></div>`;
+    if(o.status==='submitted'||o.status==='sent')h+=`<div class="banner ok review"><div><b>Анна утвердила заявку${o.approvedBy?' ('+esc(o.approvedBy)+')':''}</b>${diffL.length?`<p style="margin:6px 0 0">Что поправила Анна:</p><ul>${diffL.join('')}</ul>`:'<p style="margin:4px 0 0">Без изменений.</p>'}</div></div>`}
+  else if(can('approve')&&rev){
+    h+=`<div class="banner review"><div style="flex:1;min-width:240px"><b>Заявка от менеджера${o.reviewBy?' ('+esc(o.reviewBy)+')':''} — проверьте</b><p style="margin:4px 0 8px">${Object.keys(o.items||{}).length} позиций${o.reviewAt?' · пришла '+hm(o.reviewAt):''}. Можно поправить количество ниже или вернуть с комментарием.</p>${notesH}${diffL.length?`<p style="margin:6px 0 0">Вы поправили:</p><ul>${diffL.join('')}</ul>`:''}
+      <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn primary" id="apr">✅ Утвердить и отправить Марии</button><button class="btn" id="rbk">💬 Вернуть с комментарием</button></div>
+      <div id="rbx" hidden style="margin-top:10px"><textarea id="rbt" rows="3" placeholder="Что исправить? Например: мыла много, 2 хватит" style="width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px"></textarea><button class="btn primary" id="rbs" style="margin-top:6px">Вернуть менеджеру</button></div></div></div>`}
+  else if(can('approve')&&ret)h+=`<div class="banner"><div><b>Заявка у менеджера на доработке</b>${notesH}</div></div>`;
   if(ro)h+=`<div class="banner"><span>Вы смотрите заявку управляющей — менять её может только она.</span></div>`;
-  if(can('addExtra'))h+=`<button class="btn urgent" id="urg">⚡ Срочно / забыли — написать закупщику</button>`;
+  if(can('addExtra')&&!stf)h+=`<button class="btn urgent" id="urg">⚡ Срочно / забыли — написать закупщику</button>`;
   if(o.status==='sent')h+=`<div class="banner ok"><span>Закупщица уже отправила заказ поставщикам — изменить нельзя. Если что-то срочно, напишите ей.</span></div>`;
-  else if(o.status==='submitted'&&!ro)h+=`<div class="banner ok"><span>Заявка у закупщицы. Пока она не отправила её поставщикам, можно поправить — изменения сохранятся сами.</span></div>`;
+  else if(o.status==='submitted'&&!ro&&!stf)h+=`<div class="banner ok"><span>Заявка у закупщицы. Пока она не отправила её поставщикам, можно поправить — изменения сохранятся сами.</span></div>`;
   const row=d=>{const on=items[d.id]>0;const big=on&&u[d.id]&&items[d.id]>=u[d.id]*3;
-    return `<label class="item ph${on?' on':''}"><input type="checkbox" data-id="${d.id}" ${on?'checked':''} ${locked?'disabled':''}>${img(d)}<span class="nm">${esc(d.n)}<small>${esc(d.u)}${u[d.id]?' · обычно '+u[d.id]:''}</small>${big?`<span class="hint">В ${Math.round(items[d.id]/u[d.id])} раза больше обычного. Точно?</span>`:''}</span>${on?`<span class="qty"><button type="button" data-m="${d.id}" ${locked?'disabled':''} aria-label="меньше">−</button><input inputmode="numeric" data-q="${d.id}" value="${items[d.id]}" ${locked?'disabled':''} aria-label="количество"><button type="button" data-pl="${d.id}" ${locked?'disabled':''} aria-label="больше">+</button></span>`:'<span></span>'}</label>`};
+    return `<label class="item ph${on?' on':''}"><input type="checkbox" data-id="${d.id}" ${on?'checked':''} ${locked?'disabled':''}>${img(d)}<span class="nm">${esc(d.n)}<small>${esc(d.u)}${u[d.id]?' · обычно '+u[d.id]:''}${snap&&(Number(snap[d.id])||0)!==(Number(items[d.id])||0)?` · <b class="was">было ${Number(snap[d.id])||0}</b>`:''}</small>${big?`<span class="hint">В ${Math.round(items[d.id]/u[d.id])} раза больше обычного. Точно?</span>`:''}</span>${on?`<span class="qty"><button type="button" data-m="${d.id}" ${locked?'disabled':''} aria-label="меньше">−</button><input inputmode="numeric" data-q="${d.id}" value="${items[d.id]}" ${locked?'disabled':''} aria-label="количество"><button type="button" data-pl="${d.id}" ${locked?'disabled':''} aria-label="больше">+</button></span>`:'<span></span>'}</label>`};
   const usual=DATA.filter(d=>u[d.id]);const chosen=DATA.filter(d=>items[d.id]>0&&!u[d.id]);
   if(usual.length)h+=`<section class="block"><div class="bh"><h3>Обычно берёте</h3><span class="muted">${usual.length} позиций · по прошлым заявкам</span></div><div class="list">${usual.map(row).join('')}</div></section>`;
   else if(!ro)h+=`<div class="banner"><span>Это первая заявка в системе. Найдите позиции через поиск или по разделам — со следующей недели здесь появится список «Обычно берёте».</span></div>`;
@@ -420,7 +434,7 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
     const allMode=ql.length<2&&S.cat==='Все';if(ql.length>=2)res=res.filter(d=>d.n.toLowerCase().includes(ql));else if(!allMode)res=res.filter(d=>d.c===S.cat);
     h+=allMode&&res.length?CATS.map(c=>{const g=res.filter(d=>d.c===c);return g.length?`<h4 class="grp">${esc(c)} <span class="muted">· ${g.length}</span></h4><div class="list">${g.map(row).join('')}</div>`:''}).join(''):res.length?`<div class="list" style="margin-top:8px">${res.slice(0,120).map(row).join('')}</div>`:`<p class="muted" style="margin:8px 2px 0;font-size:13.5px">${ql.length>=2?'Ничего не нашлось.':'Введите 2–3 буквы или выберите раздел.'}</p>`;h+='</section>'}
   const n=Object.values(items).filter(q=>q>0).length;
-  h+=`<div class="sticky"><span><b>Маяк</b>: ${n} позиций${saveTimer||S.busy?' · сохраняю…':''}</span>${o.status==='sent'||ro?'':o.status==='submitted'?'<span>Изменения сохраняются сами</span>':`<button class="btn primary" id="send" ${n&&!S.busy?'':'disabled'}>Отправить закупщице</button>`}</div>`;
+  h+=`<div class="sticky"><span><b>Маяк</b>: ${n} позиций${saveTimer||S.busy?' · сохраняю…':''}</span>${o.status==='sent'||ro||stLock?'':o.status==='submitted'||(rev&&!stf)?'<span>Изменения сохраняются сами</span>':`<button class="btn primary" id="send" ${n&&!S.busy?'':'disabled'}>${stf?'Отправить на проверку Анне':'Отправить закупщице'}</button>`}</div>`;
   const L=$('m-order');setTimeout(()=>{const u=$('urg');if(u)u.onclick=()=>{S.tab.mgr='msg';render()}},0);const hadFocus=document.activeElement&&document.activeElement.id==='mq';L.innerHTML=h;
   if(hadFocus&&$('mq')){const i=$('mq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}
   if($('mq'))$('mq').oninput=e=>{S.q=e.target.value;renderOrder()};
@@ -430,7 +444,10 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
   L.querySelectorAll('[data-m]').forEach(b=>b.onclick=e=>{e.preventDefault();const id=b.dataset.m;change(id,Math.max(1,(items[id]||1)-1))});
   L.querySelectorAll('[data-pl]').forEach(b=>b.onclick=e=>{e.preventDefault();const id=b.dataset.pl;change(id,(items[id]||0)+1)});
   L.querySelectorAll('[data-q]').forEach(i=>{i.onclick=e=>e.preventDefault();i.onchange=()=>{const v=parseInt(i.value,10);change(i.dataset.q,v>0?v:0)}});
-  if($('send'))$('send').onclick=async()=>{clearTimeout(saveTimer);saveTimer=null;const it=pendingItems||o.items||{};const ok=await act('saveOrder',{date,items:it,submit:true});if(ok){pendingItems=null;status('Заявка у закупщицы.','ok')}render()}}
+  if($('send'))$('send').onclick=async()=>{clearTimeout(saveTimer);saveTimer=null;const it=pendingItems||o.items||{};const ok=await act('saveOrder',{date,items:it,submit:true});if(ok){pendingItems=null;if(!stf)status('Заявка у закупщицы.','ok')}render()};
+  if($('apr'))$('apr').onclick=async()=>{if(pendingItems)await flushSave(date);await act('approve',{date});render()};
+  if($('rbk'))$('rbk').onclick=()=>{$('rbx').hidden=!$('rbx').hidden;if(!$('rbx').hidden)$('rbt').focus()};
+  if($('rbs'))$('rbs').onclick=async()=>{const t=$('rbt').value.trim();if(!t){$('rbt').focus();return}if(pendingItems)await flushSave(date);await act('returnOrder',{date,text:t});render()}}
 function queueSave(date){clearTimeout(saveTimer);saveTimer=setTimeout(()=>flushSave(date),1200)}
 async function flushSave(date){clearTimeout(saveTimer);saveTimer=null;if(!pendingItems)return;const items=pendingItems;const r=await call('saveOrder',{date,items});apply(r);if(pendingItems===items)pendingItems=null;render()}
 // ===== ЗАКУПЩИЦА
@@ -450,8 +467,8 @@ function renderChat(M){const codes=S.supCodes||{};const on=S.supOn||{};const sel
 function orderText(date,lines){return `Заказ Гури Маяк (ул. Приморская 2/4) на ${dayAcc(date)} ${dm(date)}:\n`+lines.map((l,i)=>`${i+1}. ${l.d.n} — ${l.qty} ${l.d.u}`).join('\n')+'\nСпасибо!'}
 function renderBuyOrder(M){const dates=orderDates();const date=S.buyDate&&dates.includes(S.buyDate)?S.buyDate:(dates.find(d=>S.orders[d]&&S.orders[d].status==='submitted')||currentOrderDate());S.buyDate=date;
   const o=S.orders[date]||{};const al=allocate(o);const sent=o.sent||{};const ed=can('markSent');const sids=o.sentIds||{};const ex=o.extra||{};
-  let h=`<div class="who-line"><label for="bd">Доставка</label><select id="bd">${dates.map(d=>`<option value="${d}" ${d===date?'selected':''}>${dayName(d)}, ${dm(d)}${S.orders[d]?' · '+({draft:'черновик',submitted:'заявка готова',sent:'отправлено'}[S.orders[d].status]||''):' · заявки нет'}</option>`).join('')}</select></div>`;
-  if(!o.status||o.status==='draft')h+=`<div class="banner warn"><span>Управляющая ещё не отправила заявку${o.items?' — ниже черновик, он может измениться. В '+cutText(date).replace('до ','')+' заявка закроется сама':''}.</span></div>`;
+  let h=`<div class="who-line"><label for="bd">Доставка</label><select id="bd">${dates.map(d=>`<option value="${d}" ${d===date?'selected':''}>${dayName(d)}, ${dm(d)}${S.orders[d]?' · '+({draft:'черновик',review:'у Анны на проверке',returned:'на доработке',submitted:'заявка готова',sent:'отправлено'}[S.orders[d].status]||''):' · заявки нет'}</option>`).join('')}</select></div>`;
+  if(!o.status||['draft','review','returned'].includes(o.status))h+=`<div class="banner warn"><span>${o.status==='review'?'Заявка на проверке у Анны. Ниже — как сейчас, может измениться':o.status==='returned'?'Анна вернула заявку менеджеру на доработку':'Управляющая ещё не отправила заявку'}${o.items?' — ниже черновик, он может измениться. В '+cutText(date).replace('до ','')+' заявка закроется сама':''}.</span></div>`;
   if(!al.lines.length){M.innerHTML=h+'<div class="panel"><p class="muted">В заявке пока нет позиций.</p></div>';$('bd').onchange=e=>{S.buyDate=e.target.value;render()};return}
   al.notes.forEach(n=>h+=`<div class="banner"><span>↻ ${esc(n)}</span></div>`);
   const tot=al.lines.reduce((a,l)=>a+priceFor(l.d,l.sup)*l.qty,0);const sups=SUPS.filter(s=>al.lines.some(l=>l.sup===s));
@@ -502,7 +519,7 @@ function unreadOf(id){const seen=seenGet();const mine=me();return((S.chats||{})[
 function markSeen(id){const ms=(S.chats||{})[id]||[];if(!ms.length)return;const s=seenGet();if(s[id]===ms[ms.length-1].t)return;s[id]=ms[ms.length-1].t;lsSet('guri_seen',JSON.stringify(s))}
 function liveOrderDate(){const t=ymd(nowMsk());const ds=Object.keys(S.orders).filter(d=>d>=t&&['submitted','sent'].includes(S.orders[d].status)).sort();return ds[0]||null}
 function lastOrderDate(){const ds=Object.keys(S.orders).filter(d=>S.orders[d].items&&Object.keys(S.orders[d].items).length).sort().reverse();return ds[0]||null}
-const ST_N={draft:'черновик',submitted:'у закупщицы',sent:'отправлена поставщикам'};
+const ST_N={draft:'черновик',review:'у Анны на проверке',returned:'вернули менеджеру',submitted:'у закупщицы',sent:'отправлена поставщикам'};
 function confOf(o,s){const c=o&&o.conf&&o.conf[s];if(c)return c.st;return o&&o.sent&&o.sent[s]?'wait':null}
 const CONF_N={ok:['ok','✅ принято'],chg:['bad','✏️ есть изменения'],wait:['warn','ждём подтверждения']};
 function problems(){const out=[];const d=liveOrderDate()||lastOrderDate();const o=d&&S.orders[d];
@@ -586,7 +603,7 @@ function renderMgrMsg(){const L=$('m-msg');const d=liveOrderDate();const o=d?S.o
 
 // ===== УПРАВЛЯЮЩАЯ: ПРИЁМКА
 function recvDates(){const t=ymd(nowMsk());const ds=Object.keys(S.orders).filter(d=>d<=t||S.orders[d].status==='sent').sort().reverse().slice(0,6);if(!ds.length){let d=fromYmd(t);while(![2,5].includes(d.getUTCDay()))d=addDays(d,-1);ds.push(ymd(d))}return ds}
-function catalogFor(sup){return DATA.filter(d=>sup==='Капцова'?d.p['Амега']!=null:d.p[sup]!=null)}
+function catalogFor(sup){return DATA.filter(d=>d.p[sup]!=null)}
 function draftFor(date,s){S.recv[date]=S.recv[date]||{};if(!S.recv[date][s]){const saved=(S.receipts[date]&&S.receipts[date].sups||{})[s];S.recv[date][s]={lines:saved?JSON.parse(JSON.stringify(saved.lines||[])):[],photos:saved?[...(saved.photos||[])]:[],files:[],total:saved?saved.total:null,doc:saved?saved.doc:'',saved:!!saved}}return S.recv[date][s]}
 function refPrice(id,s){const d=BY_ID[id];if(!d)return{v:null,src:''};const l=lastP(id,s);if(l!=null)return{v:l,src:'прошлая накладная'};const b=baseP(d,s);return{v:b??null,src:'прайс'}}
 function lineFlag(ln,s){if(!ln.item)return'<span class="flag">нет в каталоге</span>';const r=refPrice(ln.item,s);if(r.v==null||!ln.price)return'';const k=ln.price/r.v;if(k>1.7||k<0.6)return`<span class="flag">другая единица? (${r.src}: ${rub(r.v)})</span>`;if(k>1.01)return`<span class="up">↑ +${((k-1)*100).toFixed(0)}% к ${r.src} (${rub(r.v)})</span>`;if(k<0.99)return`<span class="dn">↓ ${((k-1)*100).toFixed(0)}%</span>`;return'<span class="muted">цена та же</span>'}
