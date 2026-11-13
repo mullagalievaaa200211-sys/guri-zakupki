@@ -191,6 +191,7 @@ select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:
 .ad-acts{display:flex;gap:8px;margin-top:10px}
 .ad-empty{margin:auto;text-align:center;color:var(--muted);font-size:14px}.ad-ex{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;max-width:560px}
 .ad-ex button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;color:var(--fg);cursor:pointer}.ad-ex button:hover{border-color:var(--accent)}
+.ad-pick{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.ad-pick button{background:var(--surface);border:1px solid var(--accent);color:var(--fg);border-radius:10px;padding:7px 11px;font:inherit;font-size:13.5px;text-align:left;cursor:pointer}
 .ad-dots{display:flex;gap:4px;padding:13px 14px}.ad-dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:addot 1s infinite}.ad-dots i:nth-child(2){animation-delay:.15s}.ad-dots i:nth-child(3){animation-delay:.3s}
 @keyframes addot{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .ad-in{display:flex;gap:8px;align-items:flex-end;padding:12px;border-top:1px solid var(--line)}
@@ -339,7 +340,7 @@ let DATA=[],BY_ID={},CATS=[];
 const SUPS=['Амега','Костенко','Оптиком'];
 const SC={'Амега':'var(--s-amega)','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
 const OPT_MIN=5000;
-const CAN={saveOrder:['mgr','admin','stf'],approve:['mgr','admin'],returnOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin'],buyEdit:['buy','admin'],sendFix:['buy','admin'],aiAsk:['buy','admin'],aiApply:['buy','admin'],aiSetup:['admin']};
+const CAN={saveOrder:['mgr','admin','stf'],approve:['mgr','admin'],returnOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin'],buyEdit:['buy','admin'],sendFix:['buy','admin'],aiAsk:['buy','admin'],aiApply:['buy','admin'],aiSetup:['admin'],aiLocal:['buy','admin']};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
@@ -542,16 +543,46 @@ function renderFeed(M){const open=S.alerts.filter(a=>a.status==='open').sort((a,
 function rulesList(edit){const a=S.rules.filter(r=>r.active).sort((x,y)=>(y.at||'').localeCompare(x.at||''));
   return a.length?a.map(r=>`<div class="rule-row"><span><b>${esc(r.sup)}</b> — ${esc(r.text)}<small>с ${hm(r.at)}${r.until?' · до '+dm(r.until):''} · ${esc(r.by)}</small></span>${edit&&can('offRule')?`<button class="btn" data-rr="${r._id}">Отменить</button>`:'<span></span>'}</div>`).join(''):'<p class="muted">Пока ничего не записано.</p>'}
 const AI_EX=['Оптиком поднял фольгу до 1 300','Жидкое мыло теперь всегда у Костенко','Добавь губки у Амеги по 120 ₽','Оптиком: минималка 7 000 до конца месяца','У кого дешевле салфетки?'];
+
+// ===== разбор фраз без ИИ
+const LSTOP=new Set('у по до за на в во с со к и от для теперь всегда больше не берём берем убери уберите убрать добавь добавьте добавить заведи поднял подняла подняли снизил снизила снизили цена цену стоит будет руб шт нам мы это его ее их кто кого дешевле сколько какая какой цены товар новый новая возит возят привозит только заказывать брать бери берите минималка нет есть'.split(' '));
+const SUPST={'Амега':'амег','Костенко':'костен','Оптиком':'оптиком'};
+function lsup(t){const l=t.toLowerCase();return SUPS.find(x=>l.includes(SUPST[x]||x.toLowerCase()))||null}
+function ltok(t){return t.toLowerCase().replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/g,' ').split(' ').filter(w=>w&&!LSTOP.has(w)&&!Object.values(SUPST).some(x=>w.startsWith(x))&&(w.length>=3||/^\d+$/.test(w)))}
+function lmatch(a,b){if(/^\d/.test(a)||/^\d/.test(b))return a===b;let k=0;while(k<a.length&&k<b.length&&a[k]===b[k])k++;return k>=3&&k>=Math.min(a.length,b.length,5)-1}
+function lcol(t){return t.replace(/(\d)\s+(?=\d{3}\b)/g,'$1')}
+function lprice(t,loose){const c=lcol(t);let m=c.match(/(\d+(?:[.,]\d+)?)\s*(?:₽|р\b|р\.|руб\S*)/i)||c.match(/(?:до|по|за)\s+(\d+(?:[.,]\d+)?)/i)||(loose?c.match(/(\d+(?:[.,]\d+)?)\s*[.!]?\s*$/):null);return m?{v:parseFloat(m[1].replace(',','.')),s:m[1],raw:m[0]}:null}
+function luntil(t){const l=t.toLowerCase();let m=l.match(/до\s+(\d{1,2})[.\/](\d{1,2})/);const y=new Date().getFullYear();if(m)return `${y}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  if(/до конца месяца/.test(l)){const d=new Date();const e=new Date(d.getFullYear(),d.getMonth()+1,0);return `${e.getFullYear()}-${String(e.getMonth()+1).padStart(2,'0')}-${String(e.getDate()).padStart(2,'0')}`}return null}
+function lfind(t,price){const q=ltok(price?lcol(t).replace(price.raw,' '):t);if(!q.length)return[];
+  const sc=DATA.map(d=>{const nt=ltok(d.n);return{d,s:q.filter(w=>nt.some(x=>lmatch(w,x))).length}}).filter(x=>x.s>0);
+  const mx=Math.max(0,...sc.map(x=>x.s));return sc.filter(x=>x.s===mx).sort((a,b)=>a.d.n.length-b.d.n.length).map(x=>x.d)}
+function lprices(d){return supsFor(d).map(s=>`${s} ${rub(priceFor(d,s))}`).join(', ')}
+function lparse(t,forced){const l=t.toLowerCase().replace(/ё/g,'е'),sup=lsup(t),pr=lprice(t,!!sup&&!/^\s*(добав|заведи|нов)/.test(l));
+  const need=(fn)=>{const c=forced?[BY_ID[forced]].filter(Boolean):lfind(t,pr);if(!c.length)return{text:'Не нашла такой товар в каталоге. Напишите название чуть иначе — как в заявке.'};
+    if(c.length>1)return{text:'Какой именно товар?',pick:c.slice(0,6).map(d=>({id:d.id,n:d.n}))};return fn(c[0])};
+  if(/^\s*(добав|заведи|нов)/.test(l)){if(!sup||!pr)return{text:'Напишите, у кого и по какой цене. Например: «Добавь губки у Амеги по 120 ₽».'};
+    const name=t.replace(/^\s*(добавь(те)?|добавить|заведи(те)?|новый товар|новая позиция)\s*:?\s*/i,'').replace(/\s*(у|от)\s+(амег|костенк|оптиком)\S*/i,'').replace(/\s*(по|за)?\s*\d[\d\s]*(?:[.,]\d+)?\s*(₽|р\.?|руб\S*)?\s*$/i,'').replace(/[.,;:\s]+$/,'').trim();
+    if(name.length<2)return{text:'Как называется товар?'};const sec=CATS.includes('Хоз.товары')?'Хоз.товары':CATS[0];
+    return{text:'Заведу новый товар.',ops:[{op:'add',name:name[0].toUpperCase()+name.slice(1),unit:/\bуп|упак/.test(l)?'уп':'шт',section:sec,sup,price:pr.v}]}}
+  if(/\?|у кого|сколько стоит|какая цена|почем|дешевле/.test(l))return need(d=>{const c=supsFor(d).sort((a,b)=>priceFor(d,a)-priceFor(d,b));return{text:`«${d.n}»: ${lprices(d)}.${c.length>1?` Дешевле у ${c[0]}.`:''}${d.m?` Сейчас заказываем у ${d.m}.`:''}`}});
+  if(/минимал|доставк|скидк|отсрочк|выходн|не работа|временно|в наличии|праздник|счет|оплат/.test(l))return{text:'Запишу в договорённости.',ops:[{op:'note',sup:sup||'Все',text:t.trim(),until:luntil(t)}]};
+  if(/не возит|не привоз|больше нет у|снял|сняли с продажи|не будет у/.test(l)&&sup)return need(d=>({text:'Уберу поставщика у товара.',ops:[{op:'remove_sup',id:d.id,sup}]}));
+  if(/не бер[её]м|убер|убрать|удали|не нужн|не заказыва/.test(l))return need(d=>({text:'Уберу товар из каталога Маяка.',ops:[{op:'hide',id:d.id}]}));
+  if(/всегда|теперь бер|заказывать у|заказываем у|брать у|только у|переходим на/.test(l)&&sup)return need(d=>d.p[sup]==null?{text:`У ${sup} нет цены на «${d.n}». Сначала напишите цену: «${sup}: ${d.n.split(' ').slice(0,2).join(' ')} по … ₽».`}:{text:'Закреплю поставщика.',ops:[{op:'main_sup',id:d.id,sup}]});
+  if(pr&&sup)return need(d=>({text:'Поменяю цену.',ops:[{op:'price',id:d.id,sup,price:pr.v}]}));
+  if(pr&&!sup)return{text:'У какого поставщика эта цена? Напишите, например: «Оптиком: фольга 1 300».'};
+  return{text:'Запишу как договорённость. Если нужно поменять каталог — напишите поставщика, товар и цену.',ops:[{op:'note',sup:sup||'Все',text:t.trim(),until:luntil(t)}]}}
 function supIn(t){const l=t.toLowerCase();return SUPS.find(x=>l.includes(x.toLowerCase().slice(0,5)))||'Все'}
 function aiMsg(m,i){if(m.from!=='ai')return `<div class="ad-row me"><div class="ad-b">${esc(m.text||'')}</div><div class="ad-t">${hm(m.t)}</div></div>`;
-  const ops=m.desc||[];return `<div class="ad-row"><div class="ad-av">✦</div><div class="ad-col"><div class="ad-b">${esc(m.text||'')}${ops.length?`<div class="ad-card${m.status==='done'?' ok':m.status==='cancelled'?' off':''}"><div class="ad-ch">${m.status==='done'?'✓ Применено':m.status==='cancelled'?'Отменено':'Изменения'}</div>${ops.map(d=>`<div class="ad-op">${esc(d)}</div>`).join('')}${m.status==='pending'?`<div class="ad-acts"><button class="btn primary" data-aiok="${i}">Применить</button><button class="btn" data-aino="${i}">Отмена</button></div>`:''}</div>`:''}</div><div class="ad-t">Помощник · ${hm(m.t)}</div></div></div>`}
+  const ops=m.desc||[];return `<div class="ad-row"><div class="ad-av">✦</div><div class="ad-col"><div class="ad-b">${esc(m.text||'')}${ops.length?`<div class="ad-card${m.status==='done'?' ok':m.status==='cancelled'?' off':''}"><div class="ad-ch">${m.status==='done'?'✓ Применено':m.status==='cancelled'?'Отменено':'Изменения'}</div>${ops.map(d=>`<div class="ad-op">${esc(d)}</div>`).join('')}${m.status==='pending'?`<div class="ad-acts"><button class="btn primary" data-aiok="${i}">Применить</button><button class="btn" data-aino="${i}">Отмена</button></div>`:''}</div>`:''}</div>${(m.pick||[]).length?`<div class="ad-pick">${m.pick.map(p=>`<button data-pk="${i}|${esc(p.id)}">${esc(p.n)}</button>`).join('')}</div>`:''}<div class="ad-t">Помощник · ${hm(m.t)}</div></div></div>`}
 function renderRules(M){const ms=S.aichat||[],rules=S.rules.filter(r=>r.active).sort((x,y)=>(y.at||'').localeCompare(x.at||''));const ai=!!S.aiOn;
   M.innerHTML=`<section class="ad">
-   <header class="ad-h"><div class="ad-av big">✦</div><div style="min-width:0"><h3>Помощник по поставщикам</h3><p>${ai?'Пишите своими словами — поменяю цены, поставщиков и каталог. Перед изменением покажу, что именно.':'Запишите, о чём договорились с поставщиком — увидят управляющая и руководство.'}</p></div>${can('aiSetup')?`<button class="ad-key" id="aikt" title="Ключ помощника">${ai?'ИИ включён':'Подключить ИИ'}</button>`:''}</header>
+   <header class="ad-h"><div class="ad-av big">✦</div><div style="min-width:0"><h3>Помощник по поставщикам</h3><p>Пишите своими словами — поменяю цены, поставщиков и каталог. Перед изменением покажу, что именно.</p></div>${ai?'<span class="ad-key">ИИ</span>':''}</header>
    ${S.aiKeyOpen&&can('aiSetup')?`<div class="ad-keyrow"><input id="aikey" class="inp" placeholder="Ключ Google AI Studio (AIza…) или Claude (sk-ant-…)" autocomplete="off"><button class="btn primary" id="aikeyb">Сохранить</button></div>`:''}
    ${rules.length?`<div class="ad-rules"><span class="ad-rl">Действуют</span>${rules.map(r=>`<span class="ad-pill"><b>${esc(r.sup)}</b> ${esc(r.text)}${r.until?` · до ${dm(r.until)}`:''}${can('offRule')?`<button data-rr="${r._id}" aria-label="Отменить">×</button>`:''}</span>`).join('')}</div>`:''}
-   <div class="ad-chat" id="aibox">${ms.length?ms.map(aiMsg).join(''):`<div class="ad-empty"><p>${ai?'Например:':'Например: «Оптиком: минималка 7 000 до конца месяца»'}</p>${ai?`<div class="ad-ex">${AI_EX.map(x=>`<button data-ex="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:''}</div>`}${S.aiWait?'<div class="ad-row"><div class="ad-av">✦</div><div class="ad-b ad-dots"><i></i><i></i><i></i></div></div>':''}</div>
-   <div class="ad-in"><textarea id="aiq" rows="1" placeholder="${ai?'Что изменилось у поставщика?':'О чём договорились?'}">${esc(S.aiDraft||'')}</textarea><button id="aisend" aria-label="Отправить" ${S.aiWait||!can('addRule')?'disabled':''}>↑</button></div>
+   <div class="ad-chat" id="aibox">${ms.length?ms.map(aiMsg).join(''):`<div class="ad-empty"><p>Например:</p><div class="ad-ex">${AI_EX.map(x=>`<button data-ex="${esc(x)}">${esc(x)}</button>`).join('')}</div></div>`}${S.aiWait?'<div class="ad-row"><div class="ad-av">✦</div><div class="ad-b ad-dots"><i></i><i></i><i></i></div></div>':''}</div>
+   <div class="ad-in"><textarea id="aiq" rows="1" placeholder="Что изменилось у поставщика?">${esc(S.aiDraft||'')}</textarea><button id="aisend" aria-label="Отправить" ${S.aiWait||!can('addRule')?'disabled':''}>↑</button></div>
   </section>`;
   M.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>act('offRule',{id:b.dataset.rr}));
   if($('aikt'))$('aikt').onclick=()=>{S.aiKeyOpen=!S.aiKeyOpen;render()};
@@ -561,10 +592,11 @@ function renderRules(M){const ms=S.aichat||[],rules=S.rules.filter(r=>r.active).
   q.oninput=()=>{S.aiDraft=q.value;fit()};
   M.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{q.value=b.dataset.ex;S.aiDraft=q.value;q.focus();fit()});
   const send=async()=>{const t=q.value.trim();if(!t||S.aiWait)return;
-    if(!ai){S.aiDraft='';await act('addRule',{sup:supIn(t),text:t,until:null});return}
+    if(!ai){S.aiDraft='';await act('aiLocal',Object.assign({q:t,q0:t},lparse(t)));return}
     S.aiWait=true;S.aiDraft='';S.aichat=ms.concat([{from:'buy',name:WHO,text:t,t:new Date().toISOString()}]);render();
     const r=await call('aiAsk',{q:t});S.aiWait=false;if(!apply(r))S.aiDraft=t;render();setTimeout(()=>{const z=$('aiq');if(z)z.focus()},0)};
   $('aisend').onclick=send;q.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
+  M.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>{const[i,id]=b.dataset.pk.split('|');const m=(S.aichat||[])[+i];if(!m)return;act('aiLocal',Object.assign({q:'→ '+(BY_ID[id]?BY_ID[id].n:''),q0:m.q},lparse(m.q||'',id)))});
   M.querySelectorAll('[data-aiok]').forEach(b=>b.onclick=()=>act('aiApply',{i:+b.dataset.aiok}));
   M.querySelectorAll('[data-aino]').forEach(b=>b.onclick=()=>act('aiApply',{i:+b.dataset.aino,cancel:true}))}
 // ===== ДИАЛОГИ (закупщица) и сообщения (управляющая)
