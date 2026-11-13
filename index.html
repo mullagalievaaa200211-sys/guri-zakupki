@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Хозы Гури · Маяк</title>
+<html lang="ru"><head>
+<meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Хозы Гури · Маяк</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
 <style>
@@ -172,6 +172,7 @@ select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:
 .composer input{flex:1;min-width:0;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
 .qr{display:flex;flex-wrap:wrap;gap:6px}
 .qr button{font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);background:var(--surface);cursor:pointer}
+.aiops{margin:6px 0 0;padding-left:18px;display:grid;gap:3px;font-size:13.5px}
 .rule-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
 .rule-row:first-of-type{border-top:0}
 .rule-row small{display:block;color:var(--muted);font-size:12.5px}
@@ -313,7 +314,7 @@ let DATA=[],BY_ID={},CATS=[];
 const SUPS=['Амега','Костенко','Оптиком'];
 const SC={'Амега':'var(--s-amega)','Костенко':'var(--s-kost)','Оптиком':'var(--s-opt)'};
 const OPT_MIN=5000;
-const CAN={saveOrder:['mgr','admin','stf'],approve:['mgr','admin'],returnOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin'],buyEdit:['buy','admin'],sendFix:['buy','admin']};
+const CAN={saveOrder:['mgr','admin','stf'],approve:['mgr','admin'],returnOrder:['mgr','admin'],saveReceipt:['mgr','admin'],assign:['buy','admin'],markSent:['buy','admin'],closeAlert:['buy','admin'],addRule:['buy','admin'],offRule:['buy','admin'],baseline:['buy','dir','admin','mgr'],resetTest:['admin'],sendOrder:['buy','admin'],chatSend:['buy','admin','mgr'],sendAll:['buy','admin'],addExtra:['mgr','admin'],buyEdit:['buy','admin'],sendFix:['buy','admin'],aiAsk:['buy','admin'],aiApply:['buy','admin'],aiSetup:['admin']};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rub=n=>(Math.round(n*100)/100).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ₽';
@@ -348,7 +349,8 @@ async function call(action,x){
   google.script.run.withSuccessHandler(r=>res(r)).withFailureHandler(e=>{status('Не сохранилось: '+(e&&e.message||'ошибка связи')+'. Попробуйте ещё раз.','warn');res(null)}).api(PASS,WHO,action,x||{})})}
 function apply(r){if(!r)return false;if(r.error==='bad_pass'){logout('Пароль больше не подходит — спросите новый у Илиды.');return false}
   if(r.error==='forbidden'){status('Это действие недоступно для вашей роли.','warn');return false}
-  if(r.error==='max')status(r.msg,'warn');
+  if(r.error==='max'||r.error==='ai')status(r.msg,'warn');
+  if(r.catalog){DATA=r.catalog;BY_ID=Object.fromEntries(DATA.map(d=>[d.id,d]));CATS=[...new Set(DATA.map(d=>d.c))]}
   if(r.error==='locked')status('Закупщица уже отправила заказ поставщикам — изменить нельзя.','warn');
   if(r.info)status(r.info,'ok');
   if(r.state){Object.assign(S,r.state)}if(r.role)S.role=r.role;return !r.error}
@@ -358,7 +360,7 @@ function baseP(d,s){return d.p[s]}
 function supsFor(d){return Object.keys(d.p)}
 function lastP(id,s){const r=S.prices[id]&&S.prices[id][s];return r?r.price:null}
 function priceFor(d,s){return lastP(d.id,s)??baseP(d,s)}
-function defaultSup(d){const e=Object.entries(d.p).sort((a,b)=>a[1]-b[1]);if(d.f&&d.p['Амега']!=null)return 'Амега';return e[0][0]}
+function defaultSup(d){if(d.m&&d.p[d.m]!=null)return d.m;const e=Object.entries(d.p).sort((a,b)=>a[1]-b[1]);if(d.f&&d.p['Амега']!=null)return 'Амега';return e[0][0]}
 function allocate(o){const items=o&&o.items||{},ov=o&&o.assign||{};const lines=Object.keys(items).filter(id=>BY_ID[id]&&items[id]>0).map(id=>{const d=BY_ID[id];return{d,qty:items[id],sup:ov[id]||defaultSup(d),manual:!!ov[id]}});
   const optSum=lines.filter(l=>l.sup==='Оптиком').reduce((a,l)=>a+priceFor(l.d,'Оптиком')*l.qty,0);const notes=[];
   if(optSum>0&&optSum<OPT_MIN){lines.filter(l=>l.sup==='Оптиком'&&!l.manual).forEach(l=>{const alt=Object.entries(l.d.p).filter(x=>x[0]!=='Оптиком').sort((a,b)=>a[1]-b[1])[0];if(alt){l.sup=alt[0];l.moved=1}});
@@ -383,7 +385,7 @@ function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false
 function logout(msg){PASS='';status('');S.recv={};clearInterval(start.t);lsSet('guri_pass','');S.ready=false;renderLogin(msg)}
 function start(r){DATA=r.catalog||[];BY_ID=Object.fromEntries(DATA.map(d=>[d.id,d]));CATS=[...new Set(DATA.map(d=>d.c))];apply(r);
   S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir',admin:'mgr'}[S.role];if(S.role==='stf')S.tab.mgr='order';S.ready=true;$('login').hidden=true;$('app').hidden=false;render();
-  clearInterval(start.t);start.t=setInterval(async()=>{if(document.hidden||S.busy||pendingItems||start.ping)return;const ae=document.activeElement;if(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))return;start.ping=1;try{
+  clearInterval(start.t);start.t=setInterval(async()=>{if(document.hidden||S.busy||S.aiWait||pendingItems||start.ping)return;const ae=document.activeElement;if(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))return;start.ping=1;try{
     let fresh=!window.GURI_API||++start.n%12===0;if(!fresh){const p=await call('ping');fresh=p&&p.rev&&p.rev!==S.rev}
     if(fresh){const before=S.unread?{...S.unread}:{};const x=await call('state');if(x&&!x.error){apply(x);render();const nw=SUPS.filter(s=>(S.unread||{})[s]>(before[s]||0));if(nw.length&&can('chatSend'))status('Новое сообщение от '+nw.join(', ')+' — вкладка «Поставщики».','ok')}}}finally{start.ping=0}},window.GURI_API?5000:30000);start.n=0}
 // ===== навигация
@@ -514,15 +516,28 @@ function renderFeed(M){const open=S.alerts.filter(a=>a.status==='open').sort((a,
   M.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>act('closeAlert',{id:b.dataset.close,note:($('cn'+b.dataset.close).value||'').trim()}))}
 function rulesList(edit){const a=S.rules.filter(r=>r.active).sort((x,y)=>(y.at||'').localeCompare(x.at||''));
   return a.length?a.map(r=>`<div class="rule-row"><span><b>${esc(r.sup)}</b> — ${esc(r.text)}<small>с ${hm(r.at)}${r.until?' · до '+dm(r.until):''} · ${esc(r.by)}</small></span>${edit&&can('offRule')?`<button class="btn" data-rr="${r._id}">Отменить</button>`:'<span></span>'}</div>`).join(''):'<p class="muted">Пока ничего не записано.</p>'}
+function aiHtml(){const ms=S.aichat||[];
+  if(!S.aiOn)return can('aiSetup')?`<div class="panel"><h3>Помощник</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Вставьте ключ Claude API (console.anthropic.com → API Keys). Закупщица не увидит ключ.</p><div style="display:flex;gap:8px"><input id="aikey" class="inp" style="flex:1;min-width:0" placeholder="sk-ant-…" autocomplete="off"><button class="btn primary" id="aikeyb">Подключить</button></div></div>`:`<div class="panel"><h3>Помощник</h3><p class="muted">Скоро здесь появится помощник: пишете своими словами, он меняет каталог.</p></div>`;
+  return `<div class="panel"><h3>Помощник</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Пишите своими словами — помощник поменяет каталог. Например: «Оптиком поднял фольгу до 1 300», «жидкое мыло теперь всегда у Костенко», «добавь губки у Амеги по 120 ₽», «Оптиком минималка 7 000». Перед изменением покажет, что поменяет.</p>
+   <div class="chat" id="aibox">${ms.length?ms.map((m,i)=>m.from==='ai'?`<div class="msg m-in"><div class="b">${esc(m.text||'')}${(m.desc||[]).length?`<ul class="aiops">${m.desc.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>`:''}${m.status==='pending'?`<div style="display:flex;gap:8px;margin-top:8px"><button class="btn primary" data-aiok="${i}">Применить</button><button class="btn" data-aino="${i}">Отмена</button></div>`:m.status==='done'?'<div class="okdot">✓ Применено</div>':m.status==='cancelled'?'<div class="muted" style="font-size:12px">Отменено</div>':''}</div><small>Помощник · ${hm(m.t)}</small></div>`:`<div class="msg m-buy"><div class="b">${esc(m.text||'')}</div><small>${esc(m.name||'')} · ${hm(m.t)}</small></div>`).join(''):'<p class="muted" style="text-align:center;margin:18px 0">Здесь будет переписка с помощником.</p>'}${S.aiWait?'<div class="msg m-in"><div class="b muted">Думаю…</div></div>':''}</div>
+   <div style="display:flex;gap:8px;align-items:stretch;margin-top:8px"><textarea id="aiq" class="inp" rows="2" style="flex:1;min-width:0;resize:vertical" placeholder="Что изменилось у поставщика?">${esc(S.aiDraft||'')}</textarea><button class="btn primary" id="aisend" ${S.aiWait?'disabled':''}>Отправить</button></div></div>`}
 function renderRules(M){const ed=can('addRule');
-  M.innerHTML=`<div class="panel"><h3>Записать договорённость</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Что сказал поставщик: новая цена, минималка, чего нет в наличии. Запись видят руководство и управляющая.</p>
+  M.innerHTML=(can('aiAsk')?aiHtml():'')+`<div class="panel"><h3>Записать договорённость вручную</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Что сказал поставщик: новая цена, минималка, чего нет в наличии. Запись видят руководство и управляющая.</p>
    <div class="frm"><label class="fl"><span>Поставщик</span><select id="rs">${['Все поставщики',...SUPS].map(s=>`<option value="${s==='Все поставщики'?'Все':s}">${s}</option>`).join('')}</select></label>
    <label class="fl wide"><span>Что договорились</span><textarea id="rt" class="inp" rows="2" placeholder="Например: Оптиком поднял минималку до 7 000 ₽"></textarea></label>
    <label class="fl"><span>Действует до <em>(необязательно)</em></span><input type="date" id="ru" class="inp"></label>
    <button class="btn primary" id="radd" ${ed?'':'disabled'}>Записать</button></div></div>
    <div class="panel"><h3>Действующие договорённости</h3>${rulesList(true)}</div>`;
   $('radd').onclick=async()=>{const text=$('rt').value.trim();if(!text)return;await act('addRule',{sup:$('rs').value,text,until:$('ru').value||null})};
-  M.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>act('offRule',{id:b.dataset.rr}))}
+  M.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>act('offRule',{id:b.dataset.rr}));
+  if($('aikeyb'))$('aikeyb').onclick=()=>act('aiSetup',{key:$('aikey').value});
+  if(!can('aiAsk')||!S.aiOn)return;const box=$('aibox');if(box)box.scrollTop=box.scrollHeight;const q=$('aiq');
+  q.oninput=()=>S.aiDraft=q.value;
+  const send=async()=>{const t=q.value.trim();if(!t||S.aiWait)return;S.aiWait=true;S.aiDraft='';S.aichat=(S.aichat||[]).concat([{from:'buy',name:WHO,text:t,t:new Date().toISOString()}]);render();
+    const r=await call('aiAsk',{q:t});S.aiWait=false;if(!apply(r))S.aiDraft=t;render();setTimeout(()=>{const z=$('aiq');if(z)z.focus()},0)};
+  $('aisend').onclick=send;q.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
+  M.querySelectorAll('[data-aiok]').forEach(b=>b.onclick=()=>act('aiApply',{i:+b.dataset.aiok}));
+  M.querySelectorAll('[data-aino]').forEach(b=>b.onclick=()=>act('aiApply',{i:+b.dataset.aino,cancel:true}))}
 // ===== ДИАЛОГИ (закупщица) и сообщения (управляющая)
 const PT='Маяк',PT_ID='pt:Маяк',PT_MGR='Анна';
 const me=()=>S.role==='mgr'?'mgr':'buy';
