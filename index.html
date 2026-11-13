@@ -172,6 +172,31 @@ select{font:inherit;padding:6px 10px;border:1px solid var(--line);border-radius:
 .composer input{flex:1;min-width:0;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)}
 .qr{display:flex;flex-wrap:wrap;gap:6px}
 .qr button{font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;border:1px solid var(--accent);color:var(--accent);background:var(--surface);cursor:pointer}
+.ad{background:var(--surface);border:1px solid var(--line);border-radius:18px;margin-top:14px;display:flex;flex-direction:column;overflow:hidden}
+.ad-h{display:flex;gap:12px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}.ad-h h3{margin:0;font-size:16px}.ad-h p{margin:2px 0 0;color:var(--muted);font-size:13.5px;line-height:1.4}
+.ad-av{width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:13px;flex-shrink:0}.ad-av.big{width:38px;height:38px;font-size:17px}
+.ad-key{margin-left:auto;flex-shrink:0;background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+.ad-keyrow{display:flex;gap:8px;padding:12px 18px;border-bottom:1px solid var(--line)}.ad-keyrow .inp{flex:1;min-width:0}
+.ad-rules{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 18px;border-bottom:1px solid var(--line)}.ad-rl{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-right:4px}
+.ad-pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 11px;font-size:13px;max-width:100%}.ad-pill button{border:0;background:none;color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:0 4px}
+.ad-chat{height:min(56vh,520px);overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.ad-row{display:flex;gap:8px;align-items:flex-start;max-width:min(620px,92%)}.ad-row.me{align-self:flex-end;flex-direction:column;align-items:flex-end}
+.ad-col{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ad-b{background:var(--surface);border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:10px 13px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+.ad-row.me .ad-b{background:var(--accent);color:var(--surface);border-color:transparent;border-radius:16px 16px 4px 16px}
+.ad-t{font-size:11.5px;color:var(--muted);padding:0 4px}
+.ad-card{margin-top:9px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg);white-space:normal}.ad-card.ok{border-color:var(--down)}.ad-card.off{opacity:.6}
+.ad-ch{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}.ad-card.ok .ad-ch{color:var(--down)}
+.ad-op{font-size:13.5px;padding:5px 0;border-top:1px solid var(--line)}.ad-op:first-of-type{border-top:0;padding-top:0}
+.ad-acts{display:flex;gap:8px;margin-top:10px}
+.ad-empty{margin:auto;text-align:center;color:var(--muted);font-size:14px}.ad-ex{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;max-width:560px}
+.ad-ex button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font:inherit;font-size:13.5px;color:var(--fg);cursor:pointer}.ad-ex button:hover{border-color:var(--accent)}
+.ad-dots{display:flex;gap:4px;padding:13px 14px}.ad-dots i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:addot 1s infinite}.ad-dots i:nth-child(2){animation-delay:.15s}.ad-dots i:nth-child(3){animation-delay:.3s}
+@keyframes addot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.ad-in{display:flex;gap:8px;align-items:flex-end;padding:12px;border-top:1px solid var(--line)}
+.ad-in textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:14px;padding:11px 14px;font:inherit;font-size:15px;line-height:1.4;max-height:140px}
+.ad-in textarea:focus{outline:none;border-color:var(--accent)}
+.ad-in button{width:44px;height:44px;border-radius:50%;border:0;background:var(--accent);color:var(--surface);font-size:20px;font-weight:600;cursor:pointer;flex-shrink:0}.ad-in button:disabled{opacity:.4;cursor:default}
 .aiops{margin:6px 0 0;padding-left:18px;display:grid;gap:3px;font-size:13.5px}
 .rule-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
 .rule-row:first-of-type{border-top:0}
@@ -516,24 +541,28 @@ function renderFeed(M){const open=S.alerts.filter(a=>a.status==='open').sort((a,
   M.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>act('closeAlert',{id:b.dataset.close,note:($('cn'+b.dataset.close).value||'').trim()}))}
 function rulesList(edit){const a=S.rules.filter(r=>r.active).sort((x,y)=>(y.at||'').localeCompare(x.at||''));
   return a.length?a.map(r=>`<div class="rule-row"><span><b>${esc(r.sup)}</b> — ${esc(r.text)}<small>с ${hm(r.at)}${r.until?' · до '+dm(r.until):''} · ${esc(r.by)}</small></span>${edit&&can('offRule')?`<button class="btn" data-rr="${r._id}">Отменить</button>`:'<span></span>'}</div>`).join(''):'<p class="muted">Пока ничего не записано.</p>'}
-function aiHtml(){const ms=S.aichat||[];
-  if(!S.aiOn)return can('aiSetup')?`<div class="panel"><h3>Помощник</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Вставьте ключ Claude API (console.anthropic.com → API Keys). Закупщица не увидит ключ.</p><div style="display:flex;gap:8px"><input id="aikey" class="inp" style="flex:1;min-width:0" placeholder="sk-ant-…" autocomplete="off"><button class="btn primary" id="aikeyb">Подключить</button></div></div>`:`<div class="panel"><h3>Помощник</h3><p class="muted">Скоро здесь появится помощник: пишете своими словами, он меняет каталог.</p></div>`;
-  return `<div class="panel"><h3>Помощник</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Пишите своими словами — помощник поменяет каталог. Например: «Оптиком поднял фольгу до 1 300», «жидкое мыло теперь всегда у Костенко», «добавь губки у Амеги по 120 ₽», «Оптиком минималка 7 000». Перед изменением покажет, что поменяет.</p>
-   <div class="chat" id="aibox">${ms.length?ms.map((m,i)=>m.from==='ai'?`<div class="msg m-in"><div class="b">${esc(m.text||'')}${(m.desc||[]).length?`<ul class="aiops">${m.desc.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>`:''}${m.status==='pending'?`<div style="display:flex;gap:8px;margin-top:8px"><button class="btn primary" data-aiok="${i}">Применить</button><button class="btn" data-aino="${i}">Отмена</button></div>`:m.status==='done'?'<div class="okdot">✓ Применено</div>':m.status==='cancelled'?'<div class="muted" style="font-size:12px">Отменено</div>':''}</div><small>Помощник · ${hm(m.t)}</small></div>`:`<div class="msg m-buy"><div class="b">${esc(m.text||'')}</div><small>${esc(m.name||'')} · ${hm(m.t)}</small></div>`).join(''):'<p class="muted" style="text-align:center;margin:18px 0">Здесь будет переписка с помощником.</p>'}${S.aiWait?'<div class="msg m-in"><div class="b muted">Думаю…</div></div>':''}</div>
-   <div style="display:flex;gap:8px;align-items:stretch;margin-top:8px"><textarea id="aiq" class="inp" rows="2" style="flex:1;min-width:0;resize:vertical" placeholder="Что изменилось у поставщика?">${esc(S.aiDraft||'')}</textarea><button class="btn primary" id="aisend" ${S.aiWait?'disabled':''}>Отправить</button></div></div>`}
-function renderRules(M){const ed=can('addRule');
-  M.innerHTML=(can('aiAsk')?aiHtml():'')+`<div class="panel"><h3>Записать договорённость вручную</h3><p class="muted" style="margin:0 0 8px;font-size:13.5px">Что сказал поставщик: новая цена, минималка, чего нет в наличии. Запись видят руководство и управляющая.</p>
-   <div class="frm"><label class="fl"><span>Поставщик</span><select id="rs">${['Все поставщики',...SUPS].map(s=>`<option value="${s==='Все поставщики'?'Все':s}">${s}</option>`).join('')}</select></label>
-   <label class="fl wide"><span>Что договорились</span><textarea id="rt" class="inp" rows="2" placeholder="Например: Оптиком поднял минималку до 7 000 ₽"></textarea></label>
-   <label class="fl"><span>Действует до <em>(необязательно)</em></span><input type="date" id="ru" class="inp"></label>
-   <button class="btn primary" id="radd" ${ed?'':'disabled'}>Записать</button></div></div>
-   <div class="panel"><h3>Действующие договорённости</h3>${rulesList(true)}</div>`;
-  $('radd').onclick=async()=>{const text=$('rt').value.trim();if(!text)return;await act('addRule',{sup:$('rs').value,text,until:$('ru').value||null})};
+const AI_EX=['Оптиком поднял фольгу до 1 300','Жидкое мыло теперь всегда у Костенко','Добавь губки у Амеги по 120 ₽','Оптиком: минималка 7 000 до конца месяца','У кого дешевле салфетки?'];
+function supIn(t){const l=t.toLowerCase();return SUPS.find(x=>l.includes(x.toLowerCase().slice(0,5)))||'Все'}
+function aiMsg(m,i){if(m.from!=='ai')return `<div class="ad-row me"><div class="ad-b">${esc(m.text||'')}</div><div class="ad-t">${hm(m.t)}</div></div>`;
+  const ops=m.desc||[];return `<div class="ad-row"><div class="ad-av">✦</div><div class="ad-col"><div class="ad-b">${esc(m.text||'')}${ops.length?`<div class="ad-card${m.status==='done'?' ok':m.status==='cancelled'?' off':''}"><div class="ad-ch">${m.status==='done'?'✓ Применено':m.status==='cancelled'?'Отменено':'Изменения'}</div>${ops.map(d=>`<div class="ad-op">${esc(d)}</div>`).join('')}${m.status==='pending'?`<div class="ad-acts"><button class="btn primary" data-aiok="${i}">Применить</button><button class="btn" data-aino="${i}">Отмена</button></div>`:''}</div>`:''}</div><div class="ad-t">Помощник · ${hm(m.t)}</div></div></div>`}
+function renderRules(M){const ms=S.aichat||[],rules=S.rules.filter(r=>r.active).sort((x,y)=>(y.at||'').localeCompare(x.at||''));const ai=!!S.aiOn;
+  M.innerHTML=`<section class="ad">
+   <header class="ad-h"><div class="ad-av big">✦</div><div style="min-width:0"><h3>Помощник по поставщикам</h3><p>${ai?'Пишите своими словами — поменяю цены, поставщиков и каталог. Перед изменением покажу, что именно.':'Запишите, о чём договорились с поставщиком — увидят управляющая и руководство.'}</p></div>${can('aiSetup')?`<button class="ad-key" id="aikt" title="Ключ помощника">${ai?'ИИ включён':'Подключить ИИ'}</button>`:''}</header>
+   ${S.aiKeyOpen&&can('aiSetup')?`<div class="ad-keyrow"><input id="aikey" class="inp" placeholder="Ключ Claude API: sk-ant-…" autocomplete="off"><button class="btn primary" id="aikeyb">Сохранить</button></div>`:''}
+   ${rules.length?`<div class="ad-rules"><span class="ad-rl">Действуют</span>${rules.map(r=>`<span class="ad-pill"><b>${esc(r.sup)}</b> ${esc(r.text)}${r.until?` · до ${dm(r.until)}`:''}${can('offRule')?`<button data-rr="${r._id}" aria-label="Отменить">×</button>`:''}</span>`).join('')}</div>`:''}
+   <div class="ad-chat" id="aibox">${ms.length?ms.map(aiMsg).join(''):`<div class="ad-empty"><p>${ai?'Например:':'Например: «Оптиком: минималка 7 000 до конца месяца»'}</p>${ai?`<div class="ad-ex">${AI_EX.map(x=>`<button data-ex="${esc(x)}">${esc(x)}</button>`).join('')}</div>`:''}</div>`}${S.aiWait?'<div class="ad-row"><div class="ad-av">✦</div><div class="ad-b ad-dots"><i></i><i></i><i></i></div></div>':''}</div>
+   <div class="ad-in"><textarea id="aiq" rows="1" placeholder="${ai?'Что изменилось у поставщика?':'О чём договорились?'}">${esc(S.aiDraft||'')}</textarea><button id="aisend" aria-label="Отправить" ${S.aiWait||!can('addRule')?'disabled':''}>↑</button></div>
+  </section>`;
   M.querySelectorAll('[data-rr]').forEach(b=>b.onclick=()=>act('offRule',{id:b.dataset.rr}));
-  if($('aikeyb'))$('aikeyb').onclick=()=>act('aiSetup',{key:$('aikey').value});
-  if(!can('aiAsk')||!S.aiOn)return;const box=$('aibox');if(box)box.scrollTop=box.scrollHeight;const q=$('aiq');
-  q.oninput=()=>S.aiDraft=q.value;
-  const send=async()=>{const t=q.value.trim();if(!t||S.aiWait)return;S.aiWait=true;S.aiDraft='';S.aichat=(S.aichat||[]).concat([{from:'buy',name:WHO,text:t,t:new Date().toISOString()}]);render();
+  if($('aikt'))$('aikt').onclick=()=>{S.aiKeyOpen=!S.aiKeyOpen;render()};
+  if($('aikeyb'))$('aikeyb').onclick=async()=>{if(await act('aiSetup',{key:$('aikey').value}))S.aiKeyOpen=false;render()};
+  const box=$('aibox');if(box)box.scrollTop=box.scrollHeight;const q=$('aiq');
+  const fit=()=>{q.style.height='auto';q.style.height=Math.min(q.scrollHeight,140)+'px'};fit();
+  q.oninput=()=>{S.aiDraft=q.value;fit()};
+  M.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{q.value=b.dataset.ex;S.aiDraft=q.value;q.focus();fit()});
+  const send=async()=>{const t=q.value.trim();if(!t||S.aiWait)return;
+    if(!ai){S.aiDraft='';await act('addRule',{sup:supIn(t),text:t,until:null});return}
+    S.aiWait=true;S.aiDraft='';S.aichat=ms.concat([{from:'buy',name:WHO,text:t,t:new Date().toISOString()}]);render();
     const r=await call('aiAsk',{q:t});S.aiWait=false;if(!apply(r))S.aiDraft=t;render();setTimeout(()=>{const z=$('aiq');if(z)z.focus()},0)};
   $('aisend').onclick=send;q.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}};
   M.querySelectorAll('[data-aiok]').forEach(b=>b.onclick=()=>act('aiApply',{i:+b.dataset.aiok}));
