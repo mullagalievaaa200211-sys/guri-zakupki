@@ -316,11 +316,11 @@ nav.roles{flex-wrap:nowrap}
 <div class="who-line" style="justify-content:space-between"><span>Вы: <b id="whoN"></b> <span id="busy" class="pill" hidden>сохраняю…</span></span><button class="btn" id="out">Выйти</button></div>
 <nav class="roles" role="group" aria-label="Экран">
   <button data-role="mgr" aria-pressed="true">Управляющая</button>
-  <button data-role="buy" aria-pressed="false">Закупщица</button>
+  <button data-role="buy" aria-pressed="false">Закуп</button>
   <button data-role="dir" aria-pressed="false">Руководство</button>
 </nav>
 <section id="v-mgr">
-  <div class="subtabs" role="group"><button data-mt="order" aria-pressed="true">Заявка</button><button data-mt="recv" aria-pressed="false">Приёмка</button><button data-mt="msg" aria-pressed="false">Закупщица <span class="badge" id="bm"></span></button></div>
+  <div class="subtabs" role="group"><button data-mt="order" aria-pressed="true">Заявка</button><button data-mt="recv" aria-pressed="false">Приёмка</button><button data-mt="msg" aria-pressed="false">Закуп <span class="badge" id="bm"></span></button></div>
   <div id="m-order"></div>
   <div id="m-recv" hidden></div>
   <div id="m-msg" hidden></div>
@@ -377,7 +377,7 @@ function apply(r){if(!r)return false;if(r.error==='bad_pass'){logout('Парол
   if(r.error==='forbidden'){status('Это действие недоступно для вашей роли.','warn');return false}
   if(r.error==='max'||r.error==='ai')status(r.msg,'warn');
   if(r.catalog){DATA=r.catalog;BY_ID=Object.fromEntries(DATA.map(d=>[d.id,d]));CATS=[...new Set(DATA.map(d=>d.c))]}
-  if(r.error==='locked')status('Закупщица уже отправила заказ поставщикам — изменить нельзя.','warn');
+  if(r.error==='locked')status('Закуп уже отправил заказ поставщикам — изменить нельзя.','warn');
   if(r.info)status(r.info,'ok');
   if(r.state){Object.assign(S,r.state)}if(r.role)S.role=r.role;return !r.error}
 async function act(action,x){S.busy=true;render();const r=await call(action,x);S.busy=false;const ok=apply(r);render();return ok}
@@ -398,10 +398,10 @@ function showInfo(id){const d=BY_ID[id];if(!d)return;let m=document.getElementBy
   <table class="itbl"><tr><th>Поставщик</th><th>Как называется у них</th><th class="r">Цена</th></tr>${sups.map(s=>`<tr><td>${s}</td><td>${esc((d.sn||{})[s]||'—')}</td><td class="r">${rub(priceFor(d,s))}</td></tr>`).join('')}</table>
   <button class="btn primary" type="button" id="infoClose">Закрыть</button></div></div>`;m.querySelector('#infoClose').onclick=()=>m.close();m.showModal()}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(t&&t.dataset.info){e.preventDefault();e.stopPropagation();showInfo(t.dataset.info)}},true);
-const ROLE_N={mgr:'Управляющая Маяка',stf:'Менеджер Маяка',buy:'Закупщица',dir:'Руководство',admin:'Администратор'};
+const ROLE_N={mgr:'Управляющая Маяка',stf:'Менеджер Маяка',buy:'Закуп',dir:'Руководство',admin:'Администратор'};
 // ===== вход
 function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false;
-  L.innerHTML=`<div class="panel" style="max-width:420px;margin:28px auto"><h3 style="font-size:18px">Вход</h3><p class="muted" style="margin:0 0 12px;font-size:14px">Пароль выдаёт Илида: у управляющей, менеджеров, закупщицы и руководства — свой.</p>
+  L.innerHTML=`<div class="panel" style="max-width:420px;margin:28px auto"><h3 style="font-size:18px">Вход</h3><p class="muted" style="margin:0 0 12px;font-size:14px">Пароль выдаёт Илида: у управляющей, менеджеров, закупа и руководства — свой.</p>
   <form id="lf" style="display:grid;gap:10px"><label>Ваше имя<input id="ln" value="${esc(WHO||lsGet('guri_who'))}" required autocomplete="name" style="width:100%;margin-top:4px;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)"></label>
   <label>Пароль<input id="lp" type="password" required autocomplete="current-password" style="width:100%;margin-top:4px;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg)"></label>
   ${msg?`<div class="note">${esc(msg)}</div>`:''}<button class="btn primary" id="lb">Войти</button></form></div>`;
@@ -435,7 +435,7 @@ function usualQty(){const res={};Object.entries(S.orders).filter(([k,o])=>o.stat
   const u={};Object.entries(res).forEach(([id,a])=>{const s=[...a].sort((x,y)=>x-y);u[id]=s[Math.floor(s.length/2)]});return u}
 function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};const items=pendingItems||{...(o.items||{})};const ro=!can('saveOrder');const locked=o.status==='sent'||ro||(S.role==='stf'&&['review','submitted'].includes(o.status));const u=usualQty();
   const stf=S.role==='stf',rev=o.status==='review',ret=o.status==='returned';const stLock=stf&&(rev||o.status==='submitted');const snap=o.reviewSnap||null;
-  let h=`<div class="screen-h"><div><h2>Заявка на ${dayAcc(date)}, ${dm(date)}</h2><p class="muted">${stf?'Отправить управляющей':'Отправить закупщице'} ${cutText(date)}</p></div>${o.status==='sent'?'<span class="pill ok">Ушла поставщикам</span>':o.status==='submitted'?`<span class="pill ok">У закупщицы${o.submittedAt?' · '+hm(o.submittedAt):''}</span>`:rev?`<span class="pill warn">${stf?'У управляющей на проверке':'У Анны на проверке'}</span>`:ret?'<span class="pill warn">Вернули на доработку</span>':'<span class="pill">Черновик</span>'}</div>`;
+  let h=`<div class="screen-h"><div><h2>Заявка на ${dayAcc(date)}, ${dm(date)}</h2><p class="muted">${stf?'Отправить управляющей':'Отправить в закуп'} ${cutText(date)}</p></div>${o.status==='sent'?'<span class="pill ok">Ушла поставщикам</span>':o.status==='submitted'?`<span class="pill ok">В закупе${o.submittedAt?' · '+hm(o.submittedAt):''}</span>`:rev?`<span class="pill warn">${stf?'У управляющей на проверке':'У Анны на проверке'}</span>`:ret?'<span class="pill warn">Вернули на доработку</span>':'<span class="pill">Черновик</span>'}</div>`;
   const notes=(o.notes||[]).slice(-3);const notesH=notes.length?`<div class="notes">${notes.map(n=>`<p><b>${esc(n.by||'Анна')}</b> <small>${hm(n.at)}</small><br>«${esc(n.text)}»</p>`).join('')}</div>`:'';
   const diffL=snap?Object.keys({...snap,...(o.items||{})}).filter(id=>(Number(snap[id])||0)!==(Number((o.items||{})[id])||0)&&BY_ID[id]).map(id=>{const a=Number(snap[id])||0,b=Number((o.items||{})[id])||0;return `<li>${esc(BY_ID[id].n)}: ${b?(a?a+' → '+b:'добавлено '+b):'убрано'} ${b?esc(BY_ID[id].u):''}</li>`}):[];
   if(stf){
@@ -448,9 +448,9 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
       <div id="rbx" hidden style="margin-top:10px"><textarea id="rbt" rows="3" placeholder="Что исправить? Например: мыла много, 2 хватит" style="width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px"></textarea><button class="btn primary" id="rbs" style="margin-top:6px">Вернуть менеджеру</button></div></div></div>`}
   else if(can('approve')&&ret)h+=`<div class="banner"><div><b>Заявка у менеджера на доработке</b>${notesH}</div></div>`;
   if(ro)h+=`<div class="banner"><span>Вы смотрите заявку управляющей — менять её может только она.</span></div>`;
-  if(can('addExtra')&&!stf)h+=`<button class="btn urgent" id="urg">⚡ Срочно / забыли — написать закупщику</button>`;
-  if(o.status==='sent')h+=`<div class="banner ok"><span>Закупщица уже отправила заказ поставщикам — изменить нельзя. Если что-то срочно, напишите ей.</span></div>`;
-  else if(o.status==='submitted'&&!ro&&!stf)h+=`<div class="banner ok"><span>Заявка у закупщицы. Пока она не отправила её поставщикам, можно поправить — изменения сохранятся сами.</span></div>`;
+  if(can('addExtra')&&!stf)h+=`<button class="btn urgent" id="urg">⚡ Срочно / забыли — написать в закуп</button>`;
+  if(o.status==='sent')h+=`<div class="banner ok"><span>Закуп уже отправил заказ поставщикам — изменить нельзя. Если что-то срочно, напишите в закуп.</span></div>`;
+  else if(o.status==='submitted'&&!ro&&!stf)h+=`<div class="banner ok"><span>Заявка в закупе. Пока закуп не отправил её поставщикам, можно поправить — изменения сохранятся сами.</span></div>`;
   const row=d=>{const on=items[d.id]>0;const big=on&&u[d.id]&&items[d.id]>=u[d.id]*3;
     return `<label class="item ph${on?' on':''}"><input type="checkbox" data-id="${d.id}" ${on?'checked':''} ${locked?'disabled':''}>${img(d)}<span class="nm">${esc(d.n)}<small>${esc(d.u)}${u[d.id]?' · обычно '+u[d.id]:''}${snap&&(Number(snap[d.id])||0)!==(Number(items[d.id])||0)?` · <b class="was">было ${Number(snap[d.id])||0}</b>`:''}</small>${big?`<span class="hint">В ${Math.round(items[d.id]/u[d.id])} раза больше обычного. Точно?</span>`:''}</span>${on?`<span class="qty"><button type="button" data-m="${d.id}" ${locked?'disabled':''} aria-label="меньше">−</button><input inputmode="numeric" data-q="${d.id}" value="${items[d.id]}" ${locked?'disabled':''} aria-label="количество"><button type="button" data-pl="${d.id}" ${locked?'disabled':''} aria-label="больше">+</button></span>`:'<span></span>'}</label>`};
   const usual=DATA.filter(d=>u[d.id]);const chosen=DATA.filter(d=>items[d.id]>0&&!u[d.id]);
@@ -463,7 +463,7 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
     const allMode=ql.length<2&&S.cat==='Все';if(ql.length>=2)res=res.filter(d=>d.n.toLowerCase().includes(ql));else if(!allMode)res=res.filter(d=>d.c===S.cat);
     h+=allMode&&res.length?CATS.map(c=>{const g=res.filter(d=>d.c===c);return g.length?`<h4 class="grp">${esc(c)} <span class="muted">· ${g.length}</span></h4><div class="list">${g.map(row).join('')}</div>`:''}).join(''):res.length?`<div class="list" style="margin-top:8px">${res.slice(0,120).map(row).join('')}</div>`:`<p class="muted" style="margin:8px 2px 0;font-size:13.5px">${ql.length>=2?'Ничего не нашлось.':'Введите 2–3 буквы или выберите раздел.'}</p>`;h+='</section>'}
   const n=Object.values(items).filter(q=>q>0).length;
-  h+=`<div class="sticky"><span><b>Маяк</b>: ${n} позиций${saveTimer||S.busy?' · сохраняю…':''}</span>${o.status==='sent'||ro||stLock?'':o.status==='submitted'||(rev&&!stf)?'<span>Изменения сохраняются сами</span>':`<button class="btn primary" id="send" ${n&&!S.busy?'':'disabled'}>${stf?'Отправить управляющей':'Отправить закупщице'}</button>`}</div>`;
+  h+=`<div class="sticky"><span><b>Маяк</b>: ${n} позиций${saveTimer||S.busy?' · сохраняю…':''}</span>${o.status==='sent'||ro||stLock?'':o.status==='submitted'||(rev&&!stf)?'<span>Изменения сохраняются сами</span>':`<button class="btn primary" id="send" ${n&&!S.busy?'':'disabled'}>${stf?'Отправить управляющей':'Отправить в закуп'}</button>`}</div>`;
   const L=$('m-order');setTimeout(()=>{const u=$('urg');if(u)u.onclick=()=>{S.tab.mgr='msg';render()}},0);const hadFocus=document.activeElement&&document.activeElement.id==='mq';L.innerHTML=h;
   if(hadFocus&&$('mq')){const i=$('mq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}
   if($('mq'))$('mq').oninput=e=>{S.q=e.target.value;renderOrder()};
@@ -473,7 +473,7 @@ function renderOrder(){const date=currentOrderDate();const o=S.orders[date]||{};
   L.querySelectorAll('[data-m]').forEach(b=>b.onclick=e=>{e.preventDefault();const id=b.dataset.m;change(id,Math.max(1,(items[id]||1)-1))});
   L.querySelectorAll('[data-pl]').forEach(b=>b.onclick=e=>{e.preventDefault();const id=b.dataset.pl;change(id,(items[id]||0)+1)});
   L.querySelectorAll('[data-q]').forEach(i=>{i.onclick=e=>e.preventDefault();i.onchange=()=>{const v=parseInt(i.value,10);change(i.dataset.q,v>0?v:0)}});
-  if($('send'))$('send').onclick=async()=>{clearTimeout(saveTimer);saveTimer=null;const it=pendingItems||o.items||{};const ok=await act('saveOrder',{date,items:it,submit:true});if(ok){pendingItems=null;if(!stf)status('Заявка у закупщицы.','ok')}render()};
+  if($('send'))$('send').onclick=async()=>{clearTimeout(saveTimer);saveTimer=null;const it=pendingItems||o.items||{};const ok=await act('saveOrder',{date,items:it,submit:true});if(ok){pendingItems=null;if(!stf)status('Заявка в закупе.','ok')}render()};
   if($('apr'))$('apr').onclick=async()=>{if(pendingItems)await flushSave(date);await act('approve',{date});render()};
   if($('rbk'))$('rbk').onclick=()=>{$('rbx').hidden=!$('rbx').hidden;if(!$('rbx').hidden)$('rbt').focus()};
   if($('rbs'))$('rbs').onclick=async()=>{const t=$('rbt').value.trim();if(!t){$('rbt').focus();return}if(pendingItems)await flushSave(date);await act('returnOrder',{date,text:t});render()}}
@@ -486,7 +486,7 @@ function renderChat(M){const codes=S.supCodes||{};const on=S.supOn||{};const sel
   let h=`<p class="lead" style="margin-top:12px">Переписка с поставщиками через бота MAX «Гури Закупки». Поставщик подключается один раз: находит бота в MAX, жмёт «Начать» и присылает свой код. Заказы и ответы приходят сюда и вам в MAX.</p><div class="subtabs" role="group">${SUPS.map(s=>`<button data-cs="${s}" aria-pressed="${s===sel}">${s}${on[s]?' <span class="okdot" title="подключён">●</span>':''}${(S.unread||{})[s]?` <span class="badge">${S.unread[s]}</span>`:''}</button>`).join('')}</div>`;
   h+=`<div class="panel">${on[sel]?`<p class="muted" style="margin-top:0">Подключены: ${esc(on[sel].join(', '))}</p>`:`<p class="muted" style="margin-top:0">${sel} ещё не подключён к боту.${codes[sel]?` Код для подключения: <b class="code">${esc(codes[sel])}</b>`:''}</p>`}`;
   const ms=((S.chats||{})[sel]||[]).slice(-80);
-  h+=`<div class="chat" id="chatbox">${ms.length?ms.map(m=>`<div class="msg m-${m.from}"><div class="b">${esc(m.text||'')}${(m.att||[]).map(a=>`${m.text?'<br>':''}<a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name||(a.type==='image'?'фото':'файл'))}</a>`).join('')}</div>${m.from==='sys'?'':`<small>${m.from==='sup'?esc(m.name||sel):esc(m.name||'Закупщица')} · ${hm(m.t)}</small>`}</div>`).join(''):'<p class="muted">Сообщений пока нет.</p>'}</div>`;
+  h+=`<div class="chat" id="chatbox">${ms.length?ms.map(m=>`<div class="msg m-${m.from}"><div class="b">${esc(m.text||'')}${(m.att||[]).map(a=>`${m.text?'<br>':''}<a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name||(a.type==='image'?'фото':'файл'))}</a>`).join('')}</div>${m.from==='sys'?'':`<small>${m.from==='sup'?esc(m.name||sel):esc(m.name||'Закуп')} · ${hm(m.t)}</small>`}</div>`).join(''):'<p class="muted">Сообщений пока нет.</p>'}</div>`;
   if(can('chatSend'))h+=`<div class="row" style="margin-top:10px"><textarea id="ct" class="inp" rows="2" style="flex:1;min-width:200px" placeholder="${on[sel]?'Сообщение для '+sel:'Станет доступно, когда поставщик подключится'}" ${on[sel]?'':'disabled'}></textarea><button class="btn primary" id="csend" ${on[sel]&&!S.busy?'':'disabled'}>Отправить</button></div>`;
   M.innerHTML=h+'</div>';
   M.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{S.chatSup=b.dataset.cs;render()});
@@ -607,13 +607,13 @@ function unreadOf(id){const seen=seenGet();const mine=me();return((S.chats||{})[
 function markSeen(id){const ms=(S.chats||{})[id]||[];if(!ms.length)return;const s=seenGet();if(s[id]===ms[ms.length-1].t)return;s[id]=ms[ms.length-1].t;lsSet('guri_seen',JSON.stringify(s))}
 function liveOrderDate(){const t=ymd(nowMsk());const ds=Object.keys(S.orders).filter(d=>d>=t&&['submitted','sent'].includes(S.orders[d].status)).sort();return ds[0]||null}
 function lastOrderDate(){const ds=Object.keys(S.orders).filter(d=>S.orders[d].items&&Object.keys(S.orders[d].items).length).sort().reverse();return ds[0]||null}
-const ST_N={draft:'черновик',review:'у Анны на проверке',returned:'вернули менеджеру',submitted:'у закупщицы',sent:'отправлена поставщикам'};
+const ST_N={draft:'черновик',review:'у Анны на проверке',returned:'вернули менеджеру',submitted:'в закупе',sent:'отправлена поставщикам'};
 function confOf(o,s){const c=o&&o.conf&&o.conf[s];if(c)return c.st;return o&&o.sent&&o.sent[s]?'wait':null}
 const CONF_N={ok:['ok','✅ принято'],chg:['bad','✏️ есть изменения'],wait:['warn','ждём подтверждения']};
 function problems(){const out=[];const d=liveOrderDate()||lastOrderDate();const o=d&&S.orders[d];
   if(o)SUPS.forEach(s=>{const c=confOf(o,s);if(c==='chg')out.push({sup:s,t:`${s}: есть изменения по заказу на ${dm(d)}`,k:'bad'});else if(c==='wait')out.push({sup:s,t:`${s}: не подтвердил заказ на ${dm(d)}`,k:'warn'})});
   S.alerts.filter(a=>a.status==='open').forEach(a=>out.push({alert:a,t:a.text,k:'bad'}));return out}
-function msgHtml(m,sel){const mine=m.from===me();const who=m.from==='sup'?(m.name||sel):m.from==='mgr'?(m.name||PT_MGR)+' · '+PT:m.from==='buy'?(m.name||'Закупщица'):'';
+function msgHtml(m,sel){const mine=m.from===me();const who=m.from==='sup'?(m.name||sel):m.from==='mgr'?(m.name||PT_MGR)+' · '+PT:m.from==='buy'?(m.name||'Закуп'):'';
   const cls=m.from==='sys'?'m-sys':mine?'m-buy':'m-in';
   return `<div class="msg ${cls}${m.kind==='extra'?' m-extra':''}"><div class="b">${m.kind==='extra'?'<b>➕ Дописано к заявке</b><br>':''}${esc(m.text||'')}${(m.att||[]).map(a=>`${m.text?'<br>':''}<a href="${esc(a.url)}" target="_blank" rel="noopener">📎 ${esc(a.name||(a.type==='image'?'фото':'файл'))}</a>`).join('')}</div>${m.from==='sys'?'':`<small>${esc(who)} · ${hm(m.t)}</small>`}</div>`}
 function chatBox(id,ph,enabled){const ms=((S.chats||{})[id]||[]).slice(-100);
@@ -675,15 +675,15 @@ function assist(q0){const q=q0.toLowerCase().replace(/ё/g,'е');const sup=SUPS.
   return'Не поняла вопрос. Попробуйте: «что заказали на Маяке», «что дописали», «что ответила Амега», «кто подтвердил», «где дешевле перчатки».'}
 // ===== УПРАВЛЯЮЩАЯ: написать закупщице / дописать
 function renderMgrMsg(){const L=$('m-msg');const d=liveOrderDate();const o=d?S.orders[d]:null;const ed=can('addExtra');
-  let h=`<div class="dh" style="margin-top:8px"><div><b>Закупщица</b><small>Всё, что нужно сказать по заявке, — сюда. Закупщица увидит сразу, история сохраняется.</small></div></div>`;
+  let h=`<div class="dh" style="margin-top:8px"><div><b>Закуп</b><small>Всё, что нужно сказать по заявке, — сюда. Закуп увидит сразу, история сохраняется.</small></div></div>`;
   if(ed){if(o){const ql=(S.xq||'').trim().toLowerCase();const res=ql.length>=2?DATA.filter(x=>x.n.toLowerCase().includes(ql)).slice(0,8):[];
-    h+=`<div class="panel xadd"><h3>➕ Забыли позицию? Допишите к заявке на ${dayAcc(d)} ${dm(d)}</h3><p class="muted" style="margin:0 0 8px">Позиция сама добавится в заявку, закупщица увидит её в заказе${o.status==='sent'?' и отправит поставщику дозаказом':''}.</p>
+    h+=`<div class="panel xadd"><h3>➕ Забыли позицию? Допишите к заявке на ${dayAcc(d)} ${dm(d)}</h3><p class="muted" style="margin:0 0 8px">Позиция сама добавится в заявку, закуп увидит её в заказе${o.status==='sent'?' и отправит поставщику дозаказом':''}.</p>
       <input type="search" id="xq" class="inp" placeholder="Найти товар: мешки, перчатки…" value="${esc(S.xq||'')}" style="width:100%">
       ${res.map(x=>`<div class="xrow">${img(x)}<span>${esc(x.n)}<small>${esc(x.u)}${o.items&&o.items[x.id]?' · уже в заявке: '+o.items[x.id]:''}</small></span><input class="inp" type="number" min="1" value="1" data-xqty="${x.id}" aria-label="количество" style="width:70px"><button class="btn primary" data-xadd="${x.id}" ${S.busy?'disabled':''}>Дописать</button></div>`).join('')}
-      ${ql.length>=2&&!res.length?'<p class="muted">Не нашлось. Напишите закупщице сообщением ниже.</p>':''}
+      ${ql.length>=2&&!res.length?'<p class="muted">Не нашлось. Напишите в закуп сообщением ниже.</p>':''}
       ${res.length?`<label class="muted" style="font-size:13px">Почему забыли (для статистики): <select id="xwhy"><option>Забыли</option><option>Закончилось раньше</option><option>Новое блюдо / событие</option><option>Другое</option></select></label>`:''}</div>`}
     else h+=`<div class="banner"><span>Заявка ещё черновик — просто добавьте позицию на вкладке «Заявка».</span></div>`}
-  h+=`<div class="panel">`+chatBox(PT_ID,'Сообщение закупщице…',can('chatSend'))+`</div>`;
+  h+=`<div class="panel">`+chatBox(PT_ID,'Сообщение в закуп…',can('chatSend'))+`</div>`;
   const hadX=document.activeElement&&document.activeElement.id==='xq';L.innerHTML=h;
   if($('xq')){$('xq').oninput=e=>{S.xq=e.target.value;renderMgrMsg()};if(hadX){const i=$('xq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
   L.querySelectorAll('[data-xadd]').forEach(b=>b.onclick=async()=>{const id=b.dataset.xadd;const q=parseInt(L.querySelector(`[data-xqty="${id}"]`).value,10)||1;const ok=await act('addExtra',{date:d,id,qty:q,why:$('xwhy')?$('xwhy').value:''});if(ok){S.xq='';render()}});
@@ -743,7 +743,7 @@ async function saveReceipt(date,s,al){const D=draftFor(date,s);const ordered=al.
   status('Сохраняю приёмку'+(D.files.length?' и фото — до 15 секунд':'')+'…');
   const ok=await act('saveReceipt',{date,sup:s,lines,total:D.total||total,linesTotal:total,doc:D.doc||'',photos:D.files,alerts});
   if(!ok&&!document.getElementById('status').textContent.trim())status('Не сохранилось. Проверьте интернет и нажмите ещё раз.','warn');
-  if(ok){delete S.recv[date][s];status(alerts.length?`Сохранено. Закупщица получила ${alerts.length} вопрос(а) — писать ей отдельно не нужно.`:'Сохранено. Расхождений нет.','ok');render()}}
+  if(ok){delete S.recv[date][s];status(alerts.length?`Сохранено. Закуп получил ${alerts.length} вопрос(а) — писать ей отдельно не нужно.`:'Сохранено. Расхождений нет.','ok');render()}}
 // ===== РУКОВОДСТВО
 function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
   const recs=Object.entries(S.receipts).filter(([d])=>d.startsWith(m));const spend=recs.reduce((a,[d,r])=>a+Object.values(r.sups||{}).reduce((x,s)=>x+(Number(s.total)||0),0),0);
@@ -758,9 +758,9 @@ function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
   <div class="kpi"><div class="l">Расхождений на приёмке</div><div class="v">${disc}</div><div class="l">открытых вопросов: ${open}</div></div></div>`;
   if(pu.length)h+=`<h2>Подорожания</h2><div class="panel tbl"><table><tr><th>Когда</th><th>Что</th><th>Статус</th></tr>${pu.sort((a,c)=>(c.at||'').localeCompare(a.at||'')).map(a=>`<tr><td>${dm(a.date)}</td><td>${esc(a.text)}<small class="muted" style="display:block">${esc(a.sub||'')}</small></td><td>${a.status==='open'?'<span class="st warn">открыт</span>':'<span class="st ok">'+esc(a.note||'закрыт')+'</span>'}</td></tr>`).join('')}</table></div>`;
   h+=`<h2>Замер «до» старта</h2><div class="panel"><p class="muted" style="margin:0 0 10px;font-size:13.5px">Заполняем один раз до 16 ноября. Через месяц сравним с тем, что покажет система.</p>
-   <div class="rules">${[['buyMin','Минут у закупщицы на один цикл: собрать заявки и разослать поставщикам'],['mgrMin','Минут у управляющей на одну заявку'],['recvMin','Минут у управляющей на одну приёмку'],['spendSep','Расходы Маяка на хозы за сентябрь, ₽'],['spendOct','Расходы Маяка на хозы за октябрь, ₽']].map(([k,l])=>`<label class="rule"><b>${l}</b><input data-bl="${k}" inputmode="decimal" value="${b[k]??''}" ${ed?'':'disabled'} class="inp" style="width:100%;margin-top:6px"></label>`).join('')}</div>${b.at?`<p class="muted" style="font-size:12.5px;margin:8px 0 0">Обновлено ${hm(b.at)}${b.by?' · '+esc(b.by):''}</p>`:''}</div>`;
+   <div class="rules">${[['buyMin','Минут у закупа на один цикл: собрать заявки и разослать поставщикам'],['mgrMin','Минут у управляющей на одну заявку'],['recvMin','Минут у управляющей на одну приёмку'],['spendSep','Расходы Маяка на хозы за сентябрь, ₽'],['spendOct','Расходы Маяка на хозы за октябрь, ₽']].map(([k,l])=>`<label class="rule"><b>${l}</b><input data-bl="${k}" inputmode="decimal" value="${b[k]??''}" ${ed?'':'disabled'} class="inp" style="width:100%;margin-top:6px"></label>`).join('')}</div>${b.at?`<p class="muted" style="font-size:12.5px;margin:8px 0 0">Обновлено ${hm(b.at)}${b.by?' · '+esc(b.by):''}</p>`:''}</div>`;
   h+=`<h2>Договорённости с поставщиками</h2><div class="panel">${rulesList(false)}</div>`;
-  h+=`<h2>Журнал</h2><div class="panel"><ul class="log">${S.log.length?S.log.slice(0,60).map(l=>`<li><time>${hm(l.t)}</time>${esc(l.x)}${l.u?` <span class="muted">· ${esc(l.u)}</span>`:''}</li>`).join(''):'<li class="muted">Здесь появятся действия управляющей и закупщицы.</li>'}</ul></div>`;
+  h+=`<h2>Журнал</h2><div class="panel"><ul class="log">${S.log.length?S.log.slice(0,60).map(l=>`<li><time>${hm(l.t)}</time>${esc(l.x)}${l.u?` <span class="muted">· ${esc(l.u)}</span>`:''}</li>`).join(''):'<li class="muted">Здесь появятся действия управляющей и закупа.</li>'}</ul></div>`;
   if(S.role==='admin')h+=`<div class="panel"><h3>Только для Илиды</h3><p class="muted" style="margin:0 0 8px">Перед стартом теста удалить тестовые заявки, приёмки, переписку и журнал. Каталог, пароли и подключения к боту останутся.</p><button class="btn" id="rst">Очистить тестовые данные</button></div>`;
   M.innerHTML=h;const rb=$('rst');if(rb)rb.onclick=()=>{if(rb.dataset.c){act('resetTest',{})}else{rb.dataset.c=1;rb.textContent='Точно очистить? Нажмите ещё раз'}};
   M.querySelectorAll('[data-bl]').forEach(i=>i.onchange=()=>{const v=parseFloat(String(i.value).replace(',','.').replace(/\s/g,''));act('baseline',{k:i.dataset.bl,v:isNaN(v)?null:v})})}
