@@ -359,7 +359,8 @@ body{background:var(--bg)}
 .sticky .btn.primary{background:#f7efe6;color:var(--wine);border-color:#f7efe6}
 input[type=checkbox]{accent-color:var(--wine)}
 .item.on{background:var(--accent-soft)}
-@media (max-width:560px){#hTitle{font-size:38px}.hero .h-kh{width:190px;right:-56px}
+@media (max-width:560px){#app,.hero>*{zoom:.84}.hero{padding:14px 16px 18px}#hTitle{font-size:32px}.hero .h-kh{width:150px;right:-50px;bottom:-30px}.hero .h-orn{width:190px;left:-100px;top:40px}
+  .h-logo{font-size:26px}.h-card{margin-top:14px;padding:12px 16px}.h-card b{font-size:24px}.h-kick{margin-top:12px}
   body{font-size:14.5px}
   .btn{font-size:14px;padding:8px 14px}.btn.sm{font-size:13px;padding:5px 10px}
   .bh h3,.dh b{font-size:21px}
@@ -947,10 +948,10 @@ function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
 // ===== шапка и боковое меню =====
 function heroUpdate(){const v=S.view||'mgr',cd=currentOrderDate();const RR={stf:'Менеджер',mgr:'Управляющая',buy:'Закуп',dir:'Руководство',admin:'Администратор'};
   let kick=S.ready?(RR[S.role]||''):'',title='Закупки<em>Маяка</em>',card=false;
-  if(S.ready){if(v==='mgr'){const tb=S.tab.mgr;if(tb==='recv')title='Пришла<em>поставка</em>';else if(tb==='msg')title='Написать<em>закупщику</em>';else{title=`Заявка<em>на ${dayAcc(cd)}</em>`;card=true;kick+=' · собираем заявку'}}
+  if(S.ready){if(v==='mgr'){const tb=S.tab.mgr;if(tb==='recv')title='Пришла<em>поставка</em>';else if(tb==='msg')title='Написать<em>закупщику</em>';else{title='';card=true;kick+=' · собираем заявку'}}
     else if(v==='buy'){const tb=S.tab.buy;title=tb==='chat'?'Диалоги<em>с поставщиками</em>':tb==='rules'?'Помощник<em>по поставщикам</em>':'Заявки<em>и заказ</em>'}
     else title='Руководство<em>Маяк</em>'}
-  $('hKick').textContent=kick;$('hTitle').innerHTML=title;$('hCard').hidden=!card;
+  $('hKick').textContent=kick;$('hTitle').innerHTML=title;$('hTitle').hidden=!title;$('hCard').hidden=!card;
   const bd=[...document.querySelectorAll('.subtabs .badge')].some(x=>x.textContent.trim()&&x.offsetParent!==undefined&&!x.closest('[hidden]'));$('bDot').hidden=!bd;$('burger').hidden=!S.ready}
 function drawerOpen(){const v=S.view||'mgr';const it=[];const ICM={order:'📝',recv:'📦',msg:'💬'},TM={order:'Заявка',recv:'Пришла поставка',msg:'Написать закупщику'},ICB={order:'🧾',chat:'💬',rules:'✦'},TB={order:'Заявки и заказ',chat:'Диалоги',rules:'Помощник'};
   if(v==='mgr')document.querySelectorAll('#v-mgr [data-mt]').forEach(b=>{if(!b.hidden)it.push({a:'mt',id:b.dataset.mt,ic:ICM[b.dataset.mt],t:TM[b.dataset.mt],on:S.tab.mgr===b.dataset.mt,bd:(b.querySelector('.badge')||{}).textContent||''})});
