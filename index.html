@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="ru"><head>
+<html lang="ru" data-theme="light"><head>
 <meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Хозы Гури · Маяк</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Forum&family=Montserrat:wght@400;500;600;700&display=swap">
 <style>
 /* Гури · Закупки хозов */
 :root{
-  --bg:#f3f5f4; --surface:#ffffff; --fg:#17201d; --muted:#5d6b66; --line:#dbe2df;
-  --accent:#0d6b5c; --accent-soft:#e1f0ec; --up:#b4361f; --up-soft:#fbe9e5; --down:#1f7a3d; --warn:#9a6a00; --warn-soft:#fbf1d8;
+  --bg:#f7f0e8; --surface:#fffbf6; --fg:#3b1519; --muted:#8c6f68; --line:#eadfd4;
+  --accent:#5c1a20; --accent-soft:#f3e6dc; --up:#b4361f; --up-soft:#fbe9e5; --down:#3c7a3f; --warn:#a15a2a; --warn-soft:#f7e8d6;
   --s-amega:#2f5fa8; --s-kost:#c98a12; --s-opt:#9c3d8f;
-  --display:"Unbounded","Golos Text",system-ui,sans-serif; --body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Forum",Georgia,serif; --body:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif; --wine:#5c1a20; --rose:#e9b7ae;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1513; --surface:#17201d; --fg:#e6ece9; --muted:#97a6a0; --line:#2a3632;
@@ -311,14 +311,71 @@ nav.roles{flex-wrap:nowrap}
   .sup .tbl td:first-child{grid-column:1/-1;font-weight:600}
   .sup .tbl td select{width:100%}
 }
+
+/* ===== стиль Гури: бордо + крем ===== */
+body{background:var(--bg)}
+.wrap{padding-top:0}
+.hero{position:relative;overflow:hidden;background:var(--wine);color:#f7efe6;margin:0 -16px;padding:20px 20px 26px;border-radius:0 0 28px 28px}
+.hero .h-orn{position:absolute;left:-120px;top:70px;width:250px;opacity:.11;pointer-events:none}
+.hero .h-kh{position:absolute;right:-60px;bottom:-34px;width:230px;opacity:.4;pointer-events:none}
+.h-top{position:relative;display:flex;justify-content:space-between;align-items:center}
+.h-logo{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:30px;letter-spacing:.06em;line-height:1}
+.h-logo img{width:34px;height:34px}
+#burger{position:relative;background:none;border:0;color:inherit;width:46px;height:46px;display:grid;place-content:center;gap:6px;cursor:pointer;padding:0}
+#burger i{display:block;width:28px;height:2px;background:currentColor;border-radius:2px}
+#burger .dot{position:absolute;top:8px;right:4px;width:10px;height:10px;border-radius:50%;background:var(--rose);border:2px solid var(--wine)}
+.h-sub{position:relative;margin-top:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.15);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.8}
+.h-kick{position:relative;margin-top:18px;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.75}
+.h-kick:empty{display:none}
+#hTitle{position:relative;font-family:var(--display);font-weight:400;font-size:46px;line-height:1;margin:6px 0 0;text-transform:uppercase;letter-spacing:.01em}
+#hTitle em{font-style:normal;color:var(--rose);display:block}
+.h-card{position:relative;margin-top:20px;background:var(--surface);color:var(--fg);border-radius:16px;padding:16px 18px;box-shadow:0 14px 34px rgba(30,6,8,.25);max-width:440px}
+.h-card small{display:block;font-size:11px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.h-card b{display:block;font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1;margin-top:6px}
+.h-card #nextCut{display:block;color:#b0605a;font-size:13.5px;margin-top:4px}.h-card #nextCut:empty{display:none}
+#app>.who-line,nav.roles,#v-mgr>.subtabs,#v-buy>.subtabs{display:none!important}
+#m-order .screen-h h2{display:none}
+#app{margin-top:18px}
+.drawer{position:fixed;inset:0;z-index:60}
+.dr-back{position:absolute;inset:0;background:rgba(40,10,12,.45);animation:drf .2s}
+.dr-panel{position:absolute;top:0;right:0;bottom:0;width:min(330px,88vw);background:var(--bg);padding:22px 18px;display:flex;flex-direction:column;gap:4px;box-shadow:-12px 0 34px rgba(0,0,0,.25);overflow:hidden;animation:drs .25s ease-out}
+@keyframes drs{from{transform:translateX(100%)}to{transform:none}}@keyframes drf{from{opacity:0}to{opacity:1}}
+.dr-panel .dr-orn{position:absolute;right:-110px;bottom:-110px;width:300px;opacity:.07;pointer-events:none}
+.dr-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dr-h b{font-family:var(--display);font-weight:400;font-size:26px;letter-spacing:.06em;color:var(--wine);display:flex;align-items:center;gap:8px}
+.dr-h b img{width:28px;height:28px}
+.dr-x{background:none;border:0;font-size:22px;color:var(--muted);width:44px;height:44px;cursor:pointer}
+.dr-who{font-size:13.5px;color:var(--muted);padding:0 4px 12px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.dr-sec{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:14px 4px 4px}
+.dr-it{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:13px 12px;border-radius:14px;background:none;border:0;text-align:left;color:var(--fg);font-family:var(--display);font-size:24px;line-height:1.1;cursor:pointer}
+.dr-it .ic{font-size:20px;width:26px;text-align:center}
+.dr-it[aria-current="true"]{background:var(--wine);color:#f7efe6}
+.dr-it .bd{margin-left:auto;font-family:var(--body);font-size:12px;font-weight:700;background:var(--rose);color:var(--wine);border-radius:999px;padding:2px 8px}
+.dr-it.sm{font-family:var(--body);font-size:15px;padding:10px 12px}
+.dr-out{margin-top:auto;position:relative}
+.btn{border-radius:999px}
+.bh h3,.dh b{font-family:var(--display);font-weight:400;font-size:24px;text-transform:uppercase;letter-spacing:.01em;color:var(--wine)}
+.sticky{background:var(--wine);color:#f7efe6;border-radius:999px;padding:12px 14px 12px 22px}
+.sticky .btn.primary{background:#f7efe6;color:var(--wine);border-color:#f7efe6}
+input[type=checkbox]{accent-color:var(--wine)}
+.item.on{background:var(--accent-soft)}
+@media (max-width:560px){#hTitle{font-size:40px}.hero .h-kh{width:190px;right:-56px}}
 .done{background:var(--accent-soft);border-radius:10px;padding:12px 14px;font-size:14.5px;line-height:1.5}.dl2 summary{cursor:pointer;color:var(--muted);font-size:14px}.dl2 ul{margin:6px 0 0;padding-left:20px;font-size:14px;color:var(--muted)}
 </style>
 </head><body>
 <div class="wrap">
-<header class="appbar">
-  <div class="brand"><span class="mark" aria-hidden="true">Г</span><div><b>Гури · Закупки хозов</b><small>Маяк · Приморская 2/4</small></div></div>
-  <div class="next"><small>Ближайшая доставка</small><b id="nextDel">—</b><span id="nextCut"></span></div>
+<header class="hero" id="hero">
+  <img class="h-orn" src="img/orn.webp" alt="" aria-hidden="true"><img class="h-kh" src="img/khink.webp" alt="" aria-hidden="true">
+  <div class="h-top"><div class="h-logo"><img src="img/orn.webp" alt="">ГУРИ</div><button id="burger" aria-label="Меню"><i></i><i></i><i></i><span class="dot" id="bDot" hidden></span></button></div>
+  <div class="h-sub">Закупки · Маяк, Приморская 2/4</div>
+  <div class="h-kick" id="hKick"></div>
+  <h1 id="hTitle">Закупки<em>Маяка</em></h1>
+  <div class="h-card" id="hCard" hidden><small>Ближайшая доставка</small><b id="nextDel">—</b><span id="nextCut"></span></div>
 </header>
+<div class="drawer" id="drawer" hidden><div class="dr-back" id="drBack"></div><aside class="dr-panel" role="dialog" aria-label="Меню"><img class="dr-orn" src="img/orn_b.webp" alt="" aria-hidden="true">
+  <div class="dr-h"><b><img src="img/orn_b.webp" alt="">ГУРИ</b><button class="dr-x" id="drX" aria-label="Закрыть">✕</button></div>
+  <div class="dr-who" id="drWho"></div><nav id="drNav"></nav><div id="drRoles"></div>
+  <div class="dr-out"><button class="dr-it sm" id="drOut">↩ Выйти</button></div></aside></div>
 <div id="status" class="banner" hidden></div>
 <div id="login" hidden></div>
 <div id="app" hidden>
@@ -329,7 +386,7 @@ nav.roles{flex-wrap:nowrap}
   <button data-role="dir" aria-pressed="false">Руководство</button>
 </nav>
 <section id="v-mgr">
-  <div class="subtabs" role="group"><button data-mt="order" aria-pressed="true">Заявка</button><button data-mt="recv" aria-pressed="false">Приёмка</button><button data-mt="msg" aria-pressed="false">Закуп <span class="badge" id="bm"></span></button></div>
+  <div class="subtabs" role="group"><button data-mt="order" aria-pressed="true">Заявка</button><button data-mt="recv" aria-pressed="false">Пришла поставка</button><button data-mt="msg" aria-pressed="false">Написать закупщику <span class="badge" id="bm"></span></button></div>
   <div id="m-order"></div>
   <div id="m-recv" hidden></div>
   <div id="m-msg" hidden></div>
@@ -431,7 +488,7 @@ $('out').onclick=()=>logout('');
 function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=S.role==='stf';document.querySelectorAll('[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===v));
   ['mgr','buy','dir'].forEach(r=>$('v-'+r).hidden=r!==v);
-  const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='';{const ab=document.querySelector('header.appbar');if(ab)ab.hidden=['buy','dir'].includes(S.view)}
+  const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='';
   $('whoN').textContent=(WHO||'—')+' · '+(ROLE_N[S.role]||'');$('busy').hidden=!S.busy;
   {const ids=[PT_ID,...SUPS];const tot=ids.reduce((a,id)=>a+(S.role==='mgr'&&id!==PT_ID?0:unreadOf(id)),0);const pr=can('sendAll')?problems().length:0;
    $('bc').textContent=(tot||'')+'';$('bm').textContent=S.role==='mgr'||S.role==='admin'?(unreadOf(PT_ID)||''):'';document.title=(tot?'('+tot+') ':'')+'Хозы Гури · Маяк'}
@@ -864,5 +921,28 @@ function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
   $('login').hidden=false;$('login').innerHTML='<div class="panel" style="max-width:420px;margin:28px auto"><p class="muted">Загружаю…</p></div>';
   const r=await call('login',{});if(!r||r.error)return renderLogin(r&&r.error==='bad_pass'?'Пароль сменился — войдите заново.':'Нет связи, попробуйте ещё раз.');start(r)})();
 
+
+// ===== шапка и боковое меню =====
+function heroUpdate(){const v=S.view||'mgr',cd=currentOrderDate();const RR={stf:'Менеджер',mgr:'Управляющая',buy:'Закуп',dir:'Руководство',admin:'Администратор'};
+  let kick=S.ready?(RR[S.role]||''):'',title='Закупки<em>Маяка</em>',card=false;
+  if(S.ready){if(v==='mgr'){const tb=S.tab.mgr;if(tb==='recv')title='Пришла<em>поставка</em>';else if(tb==='msg')title='Написать<em>закупщику</em>';else{title=`Заявка<em>на ${dayAcc(cd)}</em>`;card=true;kick+=' · собираем заявку'}}
+    else if(v==='buy'){const tb=S.tab.buy;title=tb==='chat'?'Диалоги<em>с поставщиками</em>':tb==='rules'?'Помощник<em>по поставщикам</em>':'Заявки<em>и заказ</em>'}
+    else title='Руководство<em>Маяк</em>'}
+  $('hKick').textContent=kick;$('hTitle').innerHTML=title;$('hCard').hidden=!card;
+  const bd=[...document.querySelectorAll('.subtabs .badge')].some(x=>x.textContent.trim()&&x.offsetParent!==undefined&&!x.closest('[hidden]'));$('bDot').hidden=!bd;$('burger').hidden=!S.ready}
+function drawerOpen(){const v=S.view||'mgr';const it=[];const ICM={order:'📝',recv:'📦',msg:'💬'},TM={order:'Заявка',recv:'Пришла поставка',msg:'Написать закупщику'},ICB={order:'🧾',chat:'💬',rules:'✦'},TB={order:'Заявки и заказ',chat:'Диалоги',rules:'Помощник'};
+  if(v==='mgr')document.querySelectorAll('#v-mgr [data-mt]').forEach(b=>{if(!b.hidden)it.push({a:'mt',id:b.dataset.mt,ic:ICM[b.dataset.mt],t:TM[b.dataset.mt],on:S.tab.mgr===b.dataset.mt,bd:(b.querySelector('.badge')||{}).textContent||''})});
+  if(v==='buy')document.querySelectorAll('#v-buy [data-bt]').forEach(b=>{if(!b.hidden)it.push({a:'bt',id:b.dataset.bt,ic:ICB[b.dataset.bt],t:TB[b.dataset.bt],on:S.tab.buy===b.dataset.bt,bd:(b.querySelector('.badge')||{}).textContent||''})});
+  $('drNav').innerHTML=it.map(x=>`<button class="dr-it" data-dr="${x.a}|${x.id}" aria-current="${x.on}"><span class="ic">${x.ic}</span>${x.t}${String(x.bd).trim()?`<span class="bd">${esc(x.bd)}</span>`:''}</button>`).join('');
+  const nv=document.querySelector('nav.roles');const rl=nv&&!nv.hidden?[...nv.querySelectorAll('[data-role]')]:[];
+  $('drRoles').innerHTML=rl.length?'<div class="dr-sec">Экран</div>'+rl.map(b=>`<button class="dr-it sm" data-dr="role|${b.dataset.role}" aria-current="${b.dataset.role===v}">${esc(b.textContent)}</button>`).join(''):'';
+  $('drWho').innerHTML='Вы: '+$('whoN').innerHTML;
+  document.querySelectorAll('[data-dr]').forEach(b=>b.onclick=()=>{const[a,id]=b.dataset.dr.split('|');const t=document.querySelector(`[data-${a==='role'?'role':a}="${id}"]`);drawerClose();if(t)t.click();window.scrollTo({top:0,behavior:'smooth'})});
+  $('drawer').hidden=false}
+function drawerClose(){$('drawer').hidden=true}
+$('burger').onclick=drawerOpen;$('drX').onclick=drawerClose;$('drBack').onclick=drawerClose;$('drOut').onclick=()=>{drawerClose();$('out').click()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')drawerClose()});
+{const _r=render;render=function(){_r.apply(this,arguments);try{heroUpdate()}catch(e){}}}
+try{heroUpdate()}catch(e){}
 </script>
 </body></html>
