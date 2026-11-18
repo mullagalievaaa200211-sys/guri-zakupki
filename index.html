@@ -508,7 +508,7 @@ document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{S.view=b.data
 document.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{S.tab.mgr=b.dataset.mt;render()});
 document.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{S.tab.buy=b.dataset.bt;render()});
 $('out').onclick=()=>logout('');
-function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=S.role==='stf';document.querySelectorAll('[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
+function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=S.role!=='admin';if(S.role!=='admin')S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir'}[S.role]||S.view;document.querySelectorAll('[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===v));
   ['mgr','buy','dir'].forEach(r=>$('v-'+r).hidden=r!==v);
   const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='';
