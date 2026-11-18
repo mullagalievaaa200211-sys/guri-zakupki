@@ -366,8 +366,8 @@ const dayName=s=>WD[fromYmd(s).getUTCDay()];
 const dayAcc=s=>WDA[fromYmd(s).getUTCDay()];
 const hm=iso=>{if(!iso)return'';const d=new Date(new Date(iso).getTime()+MSK);if(isNaN(d))return'';return dm(ymd(d))+' '+String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')};
 function currentOrderDate(){const n=nowMsk();const t0=fromYmd(ymd(n));
-  for(let i=0;i<10;i++){const d=addDays(t0,i),w=d.getUTCDay();if(w!==2&&w!==5)continue;const cut=addDays(d,-2).getTime()+23*3600e3;if(n.getTime()<cut)return ymd(d)}}
-function cutText(date){const c=addDays(fromYmd(date),-2);return 'до 23:00, '+WD[c.getUTCDay()]+' '+dm(ymd(c))}
+  for(let i=0;i<10;i++){const d=addDays(t0,i),w=d.getUTCDay();if(w!==2&&w!==5)continue;const cut=addDays(d,-2).getTime()+21*3600e3;if(n.getTime()<cut)return ymd(d)}}
+function cutText(date){const c=addDays(fromYmd(date),-2);return 'до 21:00, '+WD[c.getUTCDay()]+' '+dm(ymd(c))}
 // ===== состояние
 const S={role:null,view:null,tab:{mgr:'order',buy:'order'},orders:{},receipts:{},alerts:[],rules:[],prices:{},log:[],baseline:null,
   ready:false,q:'',cat:'Все',buyDate:null,recvDate:null,recv:{},busy:false};
@@ -431,7 +431,7 @@ $('out').onclick=()=>logout('');
 function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=S.role==='stf';document.querySelectorAll('[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===v));
   ['mgr','buy','dir'].forEach(r=>$('v-'+r).hidden=r!==v);
-  const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='заявка '+cutText(cd);
+  const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='';{const ab=document.querySelector('header.appbar');if(ab)ab.hidden=['buy','dir'].includes(S.view)}
   $('whoN').textContent=(WHO||'—')+' · '+(ROLE_N[S.role]||'');$('busy').hidden=!S.busy;
   {const ids=[PT_ID,...SUPS];const tot=ids.reduce((a,id)=>a+(S.role==='mgr'&&id!==PT_ID?0:unreadOf(id)),0);const pr=can('sendAll')?problems().length:0;
    $('bc').textContent=(tot||'')+'';$('bm').textContent=S.role==='mgr'||S.role==='admin'?(unreadOf(PT_ID)||''):'';document.title=(tot?'('+tot+') ':'')+'Хозы Гури · Маяк'}
