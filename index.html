@@ -487,7 +487,7 @@ function showInfo(id){const d=BY_ID[id];if(!d)return;let m=document.getElementBy
   <table class="itbl"><tr><th>Поставщик</th><th>Как называется у них</th><th class="r">Цена</th></tr>${sups.map(s=>`<tr><td>${s}</td><td>${esc((d.sn||{})[s]||'—')}</td><td class="r">${rub(priceFor(d,s))}</td></tr>`).join('')}</table>
   <button class="btn primary" type="button" id="infoClose">Закрыть</button></div></div>`;m.querySelector('#infoClose').onclick=()=>m.close();m.showModal()}
 document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-info]');if(t&&t.dataset.info){e.preventDefault();e.stopPropagation();showInfo(t.dataset.info)}},true);
-const ROLE_N={mgr:'Управляющая Маяка',stf:'Менеджер Маяка',buy:'Закуп',dir:'Руководство',admin:'Администратор'};
+const ROLE_N={mgr:'Управляющая Маяка',stf:'Менеджер Маяка',buy:'Закуп',dir:'Руководство',admin:'Администратор',view:'Просмотр всех экранов'};
 // ===== вход
 function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false;
   L.innerHTML=`<div class="panel" style="max-width:420px;margin:28px auto"><h3 style="font-size:18px">Вход</h3><p class="muted" style="margin:0 0 12px;font-size:14px">Пароль выдаёт Илида: у управляющей, менеджеров, закупа и руководства — свой.</p>
@@ -499,7 +499,7 @@ function renderLogin(msg){$('app').hidden=true;const L=$('login');L.hidden=false
     lsSet('guri_pass',PASS);lsSet('guri_who',WHO);start(r)}}
 function logout(msg){PASS='';status('');S.recv={};clearInterval(start.t);lsSet('guri_pass','');S.ready=false;renderLogin(msg)}
 function start(r){DATA=r.catalog||[];BY_ID=Object.fromEntries(DATA.map(d=>[d.id,d]));CATS=[...new Set(DATA.filter(d=>!d.x).map(d=>d.c))];apply(r);
-  S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir',admin:'mgr'}[S.role];if(S.role==='stf')S.tab.mgr='order';S.ready=true;$('login').hidden=true;$('app').hidden=false;render();
+  S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir',admin:'mgr',view:'mgr'}[S.role];if(S.role==='stf')S.tab.mgr='order';S.ready=true;$('login').hidden=true;$('app').hidden=false;render();
   clearInterval(start.t);start.t=setInterval(async()=>{if(document.hidden||S.busy||S.aiWait||pendingItems||start.ping)return;const ae=document.activeElement;if(ae&&/INPUT|TEXTAREA|SELECT/.test(ae.tagName))return;start.ping=1;try{
     let fresh=!window.GURI_API||++start.n%12===0;if(!fresh){const p=await call('ping');fresh=p&&p.rev&&p.rev!==S.rev}
     if(fresh){const before=S.unread?{...S.unread}:{};const x=await call('state');if(x&&!x.error){apply(x);render();const nw=SUPS.filter(s=>(S.unread||{})[s]>(before[s]||0));if(nw.length&&can('chatSend'))status('Новое сообщение от '+nw.join(', ')+' — вкладка «Поставщики».','ok')}}}finally{start.ping=0}},window.GURI_API?5000:30000);start.n=0}
@@ -508,7 +508,7 @@ document.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{S.view=b.data
 document.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{S.tab.mgr=b.dataset.mt;render()});
 document.querySelectorAll('[data-bt]').forEach(b=>b.onclick=()=>{S.tab.buy=b.dataset.bt;render()});
 $('out').onclick=()=>logout('');
-function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=S.role!=='admin';if(S.role!=='admin')S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir'}[S.role]||S.view;document.querySelectorAll('[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
+function render(){if(!S.ready)return;const v=S.view||'mgr';{const nv=document.querySelector('nav.roles');if(nv)nv.hidden=!['admin','view'].includes(S.role);if(!['admin','view'].includes(S.role))S.view={mgr:'mgr',stf:'mgr',buy:'buy',dir:'dir'}[S.role]||S.view;document.querySelectorAll('[data-mt="msg"]').forEach(b=>b.hidden=S.role==='stf')}
   document.querySelectorAll('[data-role]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.role===v));
   ['mgr','buy','dir'].forEach(r=>$('v-'+r).hidden=r!==v);
   const cd=currentOrderDate();$('nextDel').textContent=dayName(cd)[0].toUpperCase()+dayName(cd).slice(1)+', '+dm(cd);$('nextCut').textContent='';
@@ -947,7 +947,7 @@ function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
 
 
 // ===== шапка и боковое меню =====
-function heroUpdate(){const v=S.view||'mgr',cd=currentOrderDate();const RR={stf:'Менеджер',mgr:'Управляющая',buy:'Закуп',dir:'Руководство',admin:'Администратор'};
+function heroUpdate(){const v=S.view||'mgr',cd=currentOrderDate();const RR={stf:'Менеджер',mgr:'Управляющая',buy:'Закуп',dir:'Руководство',admin:'Администратор',view:'Просмотр'};
   let kick=S.ready?(RR[S.role]||''):'',title='Закупки<em>Маяка</em>',card=false;
   if(S.ready){if(v==='mgr'){const tb=S.tab.mgr;if(tb==='recv')title='Пришла<em>поставка</em>';else if(tb==='msg')title='Написать<em>закупщику</em>';else{title='';card=true;kick+=' · собираем заявку'}}
     else if(v==='buy'){const tb=S.tab.buy;title=tb==='chat'?'Диалоги<em>с поставщиками</em>':tb==='rules'?'Помощник<em>по поставщикам</em>':'Заявки<em>и заказ</em>'}
