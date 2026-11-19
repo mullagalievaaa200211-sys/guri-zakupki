@@ -801,7 +801,7 @@ function lastOrderDate(){const ds=Object.keys(S.orders).filter(d=>S.orders[d].it
 const ST_N={draft:'черновик',review:'у Анны на проверке',returned:'вернули менеджеру',submitted:'в закупе',sent:'отправлена поставщикам'};
 function confOf(o,s){const c=o&&o.conf&&o.conf[s];if(c)return c.st;return o&&o.sent&&o.sent[s]?'wait':null}
 const AMEGA_URL='https://docs.google.com/spreadsheets/d/1OToCA7Pd53yVzDZwRw57wdWRrNixgYLzaFOQzYXhhQs/edit';
-function waAmega(date,fix){return 'https://wa.me/?text='+encodeURIComponent(`Добрый день! ${fix?'Обновили заявку':'Заявка'} Гури «Маяк» на ${dayName(date)}, ${dm(date)} — в таблице, вкладка «Маяк»: ${AMEGA_URL}\nОтметьте, пожалуйста, в колонке «Ответ Амеги»: есть / нет / замена. Вопросы можно писать комментарием прямо в таблице.`)}
+function waAmega(date,fix){return 'https://wa.me/?text='+encodeURIComponent(`Добрый день! ${fix?'Обновили заявку':'Заявка'} Гури «Маяк» на ${dayName(date)}, ${dm(date)} — в таблице, вкладка «Маяк»: ${AMEGA_URL}\nЕсли всё есть — ничего отмечать не нужно. Если чего-то нет или будет позже — напишите в колонке «Комментарий» у этой строки.`)}
 const CONF_N={ok:['ok','✅ принято'],chg:['bad','✏️ есть изменения'],wait:['warn','ждём подтверждения']};
 function problems(){const out=[];const d=liveOrderDate()||lastOrderDate();const o=d&&S.orders[d];
   if(o)SUPS.forEach(s=>{const c=confOf(o,s);if(c==='chg')out.push({sup:s,t:`${s}: есть изменения по заказу на ${dm(d)}`,k:'bad'});else if(c==='wait')out.push({sup:s,t:`${s}: не подтвердил заказ на ${dm(d)}`,k:'warn'})});
