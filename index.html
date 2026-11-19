@@ -65,6 +65,18 @@ h2{font-family:var(--display);font-weight:500;font-size:18px;margin:28px 0 10px}
 .bh:hover{border-color:var(--accent)}.bh[aria-current=true]{border-color:var(--accent);background:var(--bg)}.bh b{display:block;font-size:14.5px}.bh small{color:var(--muted,#7a6a66);font-size:12.5px;display:block;margin-top:2px}
 .bh .st{font-size:11.5px;padding:1px 7px;margin-left:6px}
 @media (max-width:1000px){.bsplit{grid-template-columns:1fr}.bsplit>aside{position:static;order:-1}.bhist:not(.all) .bh:nth-of-type(n+4){display:none}}.bmore{display:none}@media (max-width:1000px){.bmore{display:inline-block;margin-top:8px}}
+.dv-seg{display:flex;gap:2px;height:22px;border-radius:6px;overflow:hidden;margin:4px 0 14px}.dv-seg i{display:block;height:100%}
+.dv-row{display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line)}.dv-row:first-of-type{border-top:0}
+.dv-dot{width:10px;height:10px;border-radius:3px;display:inline-block}.dv-row b{font-size:15px}.dv-row .muted{font-size:12.5px}.dv-row .r{text-align:right;font-variant-numeric:tabular-nums}
+.dv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}.dv-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.dv-card h3{margin:0 0 2px;font-size:16px}.dv-card .sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.dv-hb{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 76px;gap:10px;align-items:center;padding:5px 0;font-size:13.5px}.dv-hb .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dv-hb .t{height:10px;background:var(--bg);border-radius:0 4px 4px 0}.dv-hb .t i{display:block;height:100%;border-radius:0 4px 4px 0;background:var(--accent)}.dv-hb .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px}
+.dv-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px}.dv-hero .kpi .v{font-family:Forum,serif;font-size:34px;line-height:1.1}
+.dv-per{display:flex;gap:6px;margin-top:14px}.dv-per button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:5px 12px;cursor:pointer}.dv-per button[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dv-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:6px}.dv-leg span{display:inline-flex;align-items:center;gap:6px}
+#dvTip{position:fixed;pointer-events:none;background:var(--fg);color:var(--surface);font-size:12.5px;padding:6px 9px;border-radius:8px;z-index:99;max-width:260px;display:none;line-height:1.35}
+details.dv-more summary{cursor:pointer;font-weight:600;padding:6px 0}
 .sup{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-top:12px;overflow:hidden}
 .sup>.h{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .sup>.h b{font-size:16px}
@@ -934,25 +946,44 @@ async function saveReceipt(date,s,al){const D=draftFor(date,s);const ordered=al.
   if(!ok&&!document.getElementById('status').textContent.trim())status('Не сохранилось. Проверьте интернет и нажмите ещё раз.','warn');
   if(ok){delete S.recv[date][s];status(alerts.length?`Сохранено. Закуп получил ${alerts.length} вопрос(а) — писать ей отдельно не нужно.`:'Сохранено. Расхождений нет.','ok');render()}}
 // ===== РУКОВОДСТВО
-function renderDir(){const M=$('d-main');const m=ymd(nowMsk()).slice(0,7);
-  const recs=Object.entries(S.receipts).filter(([d])=>d.startsWith(m));const spend=recs.reduce((a,[d,r])=>a+Object.values(r.sups||{}).reduce((x,s)=>x+(Number(s.total)||0),0),0);
-  const ords=Object.entries(S.orders).filter(([d,o])=>d.startsWith(m)&&o.status==='sent').length;
-  const am=S.alerts.filter(a=>(a.date||'').startsWith(m));const pu=am.filter(a=>a.type==='price');const over=pu.reduce((a,x)=>a+(Number(x.over)||0),0);
-  const disc=am.filter(a=>a.type!=='price').length;const open=S.alerts.filter(a=>a.status!=='closed').length;const b=S.baseline||{};const ed=can('baseline');
+function dvTipInit(){if($('dvTip'))return;const t=document.createElement('div');t.id='dvTip';document.body.appendChild(t);
+  document.addEventListener('mousemove',e=>{const el=e.target.closest&&e.target.closest('[data-tip]');if(!el){t.style.display='none';return}t.innerHTML=el.dataset.tip;t.style.display='block';const x=Math.min(e.clientX+14,innerWidth-t.offsetWidth-8),y=e.clientY+16+t.offsetHeight>innerHeight?e.clientY-t.offsetHeight-10:e.clientY+16;t.style.left=x+'px';t.style.top=y+'px'});
+  document.addEventListener('touchstart',e=>{const el=e.target.closest&&e.target.closest('[data-tip]');if(!el){t.style.display='none';return}t.innerHTML=el.dataset.tip;t.style.display='block';const r=el.getBoundingClientRect();t.style.left=Math.max(8,Math.min(r.left,innerWidth-t.offsetWidth-8))+'px';t.style.top=Math.max(8,r.top-t.offsetHeight-8)+'px'},{passive:true})}
+const SCH={'Амега':'#2f5fa8','Костенко':'#c98a12','Оптиком':'#9c3d8f'};
+function renderDir(){const M=$('d-main');dvTipInit();const m=ymd(nowMsk()).slice(0,7);const per=S.dirP||'all';const inP=d=>per==='all'||d.startsWith(m);
   const MON=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
-  let h=`<p class="lead" style="margin-top:16px">Маяк, хозы, ${MON[+m.slice(5)-1]} ${m.slice(0,4)}. Всё ниже — из заявок и приёмок в системе. Подробные строки — в Google Таблице, вкладки «Заявки» и «Журнал».</p>
-  <div class="kpis"><div class="kpi"><div class="l">Заказов отправлено поставщикам</div><div class="v">${ords}</div></div>
-  <div class="kpi"><div class="l">По накладным за месяц</div><div class="v">${rub0(spend)}</div><div class="l">${recs.length} поставок принято</div></div>
-  <div class="kpi"><div class="l">Подорожаний поймано</div><div class="v">${pu.length}</div><div class="l">${over?'переплата на поставках '+rub0(over):'—'}</div></div>
-  <div class="kpi"><div class="l">Расхождений на приёмке</div><div class="v">${disc}</div><div class="l">открытых вопросов: ${open}</div></div></div>`;
+  const ods=Object.keys(S.orders).filter(d=>inP(d)&&['submitted','sent'].includes(S.orders[d].status)&&Object.keys(S.orders[d].items||{}).length).sort();
+  const bySup={},byCat={},byItem={},byOrd=[];let tot=0,pos=0;
+  ods.forEach(d=>{const al=allocate(S.orders[d]);const row={d,s:{}};al.lines.forEach(l=>{const sup=l.sup||'—';const v=(priceFor(l.d,sup)||0)*l.qty;tot+=v;pos++;
+    const b=bySup[sup]=bySup[sup]||{v:0,n:0,o:new Set()};b.v+=v;b.n++;b.o.add(d);row.s[sup]=(row.s[sup]||0)+v;
+    const c=l.d.c||'Прочее';byCat[c]=(byCat[c]||0)+v;const it=byItem[l.d.id]=byItem[l.d.id]||{n:l.d.n,u:l.d.u,v:0,q:0};it.v+=v;it.q+=l.qty});byOrd.push(row)});
+  const recs=Object.entries(S.receipts).filter(([d])=>inP(d));const spend=recs.reduce((a,[d,r])=>a+Object.values(r.sups||{}).reduce((x,s)=>x+(Number(s.total)||0),0),0);
+  const am=S.alerts.filter(a=>inP(a.date||''));const pu=am.filter(a=>a.type==='price');const over=pu.reduce((a,x)=>a+(Number(x.over)||0),0);const disc=am.filter(a=>a.type!=='price').length;const open=S.alerts.filter(a=>a.status!=='closed').length;
+  const pl=(n,a,b,c)=>n+' '+(n%10==1&&n%100!=11?a:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?b:c);const pct=v=>tot?Math.round(v/tot*100):0;const sups=Object.keys(bySup).sort((a,b)=>bySup[b].v-bySup[a].v);const col=s=>SCH[s]||'#8a7a76';
+  let h=`<div class="dv-per" role="group"><button data-dp="all" aria-pressed="${per==='all'}">За всё время</button><button data-dp="month" aria-pressed="${per==='month'}">${MON[+m.slice(5)-1][0].toUpperCase()+MON[+m.slice(5)-1].slice(1)}</button></div>`;
+  h+=`<div class="dv-hero"><div class="kpi"><div class="l">Заказано хозов</div><div class="v">${rub0(tot)}</div><div class="l">по ценам поставщиков</div></div>
+   <div class="kpi"><div class="l">Заявок</div><div class="v">${ods.length}</div><div class="l">${ods.length?'в среднем '+rub0(tot/ods.length):'—'}</div></div>
+   <div class="kpi"><div class="l">Принято по накладным</div><div class="v">${rub0(spend)}</div><div class="l">${recs.length} поставок</div></div>
+   <div class="kpi"><div class="l">Подорожаний поймано</div><div class="v">${pu.length}</div><div class="l">${over?'переплата '+rub0(over):'расхождений на приёмке: '+disc}</div></div></div>`;
+  if(!ods.length){h+=`<div class="panel" style="margin-top:14px"><p class="muted" style="margin:0">Графики появятся, когда управляющая утвердит первую заявку.</p></div>`}
+  else{
+   h+=`<div class="dv-card" style="margin-top:14px"><h3>У кого заказываем</h3><p class="sub">Доля в сумме заказов</p><div class="dv-seg">${sups.map(s=>`<i style="flex:${bySup[s].v||0.0001};background:${col(s)}" data-tip="<b>${s}</b><br>${rub0(bySup[s].v)} · ${pct(bySup[s].v)}%"></i>`).join('')}</div>
+    ${sups.map(s=>`<div class="dv-row" data-tip="<b>${s}</b><br>${pl(bySup[s].n,'строка','строки','строк')}"><span class="dv-dot" style="background:${col(s)}"></span><span><b>${s}</b> <span class="muted">· ${pl(bySup[s].n,'позиция','позиции','позиций')} · ${pl(bySup[s].o.size,'заявка','заявки','заявок')}</span></span><span class="r"><b>${rub0(bySup[s].v)}</b> <span class="muted">${pct(bySup[s].v)}%</span></span></div>`).join('')}</div>`;
+   // по заявкам — столбцы
+   const last=byOrd.slice(-10);const mx=Math.max(...last.map(r=>Object.values(r.s).reduce((a,b)=>a+b,0)),1);const W=100/last.length;
+   const bars=last.map((r,i)=>{let y=150;const segs=sups.filter(s=>r.s[s]).map(s=>{const hh=Math.max(1.5,r.s[s]/mx*120);y-=hh;const g=`<rect x="${i*W+W*.2}%" y="${y+1}" width="${W*.6}%" height="${Math.max(0,hh-2)}" rx="3" fill="${col(s)}" data-tip="<b>${dm(r.d)}</b> · ${s}<br>${rub0(r.s[s])}"></rect>`;return g}).join('');const sum=Object.values(r.s).reduce((a,b)=>a+b,0);
+     return segs+`<text x="${i*W+W/2}%" y="${y-6}" text-anchor="middle" font-size="11" fill="var(--muted)">${Math.round(sum/1000)}к</text><text x="${i*W+W/2}%" y="168" text-anchor="middle" font-size="11" fill="var(--muted)">${dm(r.d)}</text>`}).join('');
+   h+=`<div class="dv-grid"><div class="dv-card"><h3>Сумма по заявкам</h3><p class="sub">Последние ${last.length}, ₽, по поставщикам</p><svg width="100%" height="174" role="img" aria-label="Сумма по заявкам"><line x1="0" x2="100%" y1="150" y2="150" stroke="var(--line)"></line>${bars}</svg><div class="dv-leg">${sups.map(s=>`<span><i class="dv-dot" style="background:${col(s)}"></i>${s}</span>`).join('')}</div></div>`;
+   const cats=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);const top=cats.slice(0,7);const rest=cats.slice(7).reduce((a,c)=>a+c[1],0);if(rest)top.push(['Остальное',rest]);const cm=Math.max(...top.map(c=>c[1]),1);
+   h+=`<div class="dv-card"><h3>На что уходят деньги</h3><p class="sub">По категориям каталога</p>${top.map(([c,v])=>`<div class="dv-hb" data-tip="<b>${esc(c)}</b><br>${rub0(v)} · ${pct(v)}%"><span class="n">${esc(c)}</span><span class="t"><i style="width:${v/cm*100}%"></i></span><span class="v">${rub0(v)}</span></div>`).join('')}</div>`;
+   const its=Object.values(byItem).sort((a,b)=>b.v-a.v).slice(0,8);const im=Math.max(...its.map(x=>x.v),1);
+   h+=`<div class="dv-card"><h3>Самые дорогие позиции</h3><p class="sub">Топ-8 по сумме</p>${its.map(x=>`<div class="dv-hb" data-tip="<b>${esc(x.n)}</b><br>${x.q} ${esc(x.u)} · ${rub0(x.v)}"><span class="n">${esc(x.n)}</span><span class="t"><i style="width:${x.v/im*100}%"></i></span><span class="v">${rub0(x.v)}</span></div>`).join('')}</div></div>`}
   if(pu.length)h+=`<h2>Подорожания</h2><div class="panel tbl"><table><tr><th>Когда</th><th>Что</th><th>Статус</th></tr>${pu.sort((a,c)=>(c.at||'').localeCompare(a.at||'')).map(a=>`<tr><td>${dm(a.date)}</td><td>${esc(a.text)}<small class="muted" style="display:block">${esc(a.sub||'')}</small></td><td>${a.status==='open'?'<span class="st warn">открыт</span>':'<span class="st ok">'+esc(a.note||'закрыт')+'</span>'}</td></tr>`).join('')}</table></div>`;
-  h+=`<h2>Замер «до» старта</h2><div class="panel"><p class="muted" style="margin:0 0 10px;font-size:13.5px">Заполняем один раз до 16 ноября. Через месяц сравним с тем, что покажет система.</p>
-   <div class="rules">${[['buyMin','Минут у закупа на один цикл: собрать заявки и разослать поставщикам'],['mgrMin','Минут у управляющей на одну заявку'],['recvMin','Минут у управляющей на одну приёмку'],['spendSep','Расходы Маяка на хозы за сентябрь, ₽'],['spendOct','Расходы Маяка на хозы за октябрь, ₽']].map(([k,l])=>`<label class="rule"><b>${l}</b><input data-bl="${k}" inputmode="decimal" value="${b[k]??''}" ${ed?'':'disabled'} class="inp" style="width:100%;margin-top:6px"></label>`).join('')}</div>${b.at?`<p class="muted" style="font-size:12.5px;margin:8px 0 0">Обновлено ${hm(b.at)}${b.by?' · '+esc(b.by):''}</p>`:''}</div>`;
-  h+=`<h2>Договорённости с поставщиками</h2><div class="panel">${rulesList(false)}</div>`;
-  h+=`<h2>Журнал</h2><div class="panel"><ul class="log">${S.log.length?S.log.slice(0,60).map(l=>`<li><time>${hm(l.t)}</time>${esc(l.x)}${l.u?` <span class="muted">· ${esc(l.u)}</span>`:''}</li>`).join(''):'<li class="muted">Здесь появятся действия управляющей и закупа.</li>'}</ul></div>`;
-  if(S.role==='admin')h+=`<div class="panel"><h3>Только для Илиды</h3><p class="muted" style="margin:0 0 8px">Перед стартом теста удалить тестовые заявки, приёмки, переписку и журнал. Каталог, пароли и подключения к боту останутся.</p><button class="btn" id="rst">Очистить тестовые данные</button></div>`;
+  h+=`<details class="dv-more panel" style="margin-top:14px"><summary>Договорённости с поставщиками</summary>${rulesList(false)}</details>`;
+  h+=`<details class="dv-more panel"><summary>Журнал действий</summary><ul class="log">${S.log.length?S.log.slice(0,60).map(l=>`<li><time>${hm(l.t)}</time>${esc(l.x)}${l.u?` <span class="muted">· ${esc(l.u)}</span>`:''}</li>`).join(''):'<li class="muted">Здесь появятся действия управляющей и закупа.</li>'}</ul></details>`;
+  if(S.role==='admin')h+=`<div class="panel"><h3>Только для Илиды</h3><p class="muted" style="margin:0 0 8px">Удалить тестовые заявки, приёмки, переписку и журнал. Каталог, пароли и подключения к боту останутся.</p><button class="btn" id="rst">Очистить тестовые данные</button></div>`;
   M.innerHTML=h;const rb=$('rst');if(rb)rb.onclick=()=>{if(rb.dataset.c){act('resetTest',{})}else{rb.dataset.c=1;rb.textContent='Точно очистить? Нажмите ещё раз'}};
-  M.querySelectorAll('[data-bl]').forEach(i=>i.onchange=()=>{const v=parseFloat(String(i.value).replace(',','.').replace(/\s/g,''));act('baseline',{k:i.dataset.bl,v:isNaN(v)?null:v})})}
+  M.querySelectorAll('[data-dp]').forEach(b=>b.onclick=()=>{S.dirP=b.dataset.dp;render()})}
 // ===== запуск
 (async()=>{PASS=lsGet('guri_pass');WHO=lsGet('guri_who');if(!PASS)return renderLogin('');
   $('login').hidden=false;$('login').innerHTML='<div class="panel" style="max-width:420px;margin:28px auto"><p class="muted">Загружаю…</p></div>';
